@@ -15,7 +15,8 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	process(message) {
 		this.parseCommand(message.content)
 		console.log(this.data.command.name)
-//		this.data.commands[this.data.command.name](message)
+		this[this.data.command.name](message)
+		// this.data.commands[this.data.command.name](message)
 	}
 
 
@@ -23,6 +24,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 
 	commandInit(message) {
+		console.log(this.config)
 		this.data.channel = message.guild.channels.find('name', this.config.channel_name)
 		console.log("commandInit")
 	}
@@ -69,7 +71,8 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	parseCommand(txt) {
 		var cmd = txt.split(" ")
-		this.data.command.cmd = cmd.splice(0, 1)
+		cmd.splice(0, 1)
+		this.data.command.name = cmd.splice(0, 1)[0]
 		this.data.command.args = cmd
 	}
 }
