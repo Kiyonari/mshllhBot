@@ -5,7 +5,7 @@ module.exports = {
 	modules: ["Censorship", "MessageUpdateTracker", "DMMshllhSender", "GayCommand", "MashallahImageSender", "MessageUpdateTracker", "NoHomoMessageSender", "PutTheBell", "RandomInteractions", "9GagReplacer", "AsciiReactions", "RTSiTTrist", "Sudoku", "RandomRename", "DidYouCallMe", "LesTerroristesDeThiercelieux"],
 	events_configuration: {
 		'message': function(message) {
-			return !message.author.bot && message.author.id != constants.bot_id && message.content[0] != constants.command_prefix
+			return !message.author.bot && message.author.id != constants.bot_id
 		},
 		'messageDelete': function(message) {
 			return message.content[0] != constants.command_prefix
