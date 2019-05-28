@@ -2,7 +2,7 @@ const client_config = require('./config.json')
 const Discord = require('discord.js')
 const client = new Discord.Client()
 const constants = require("./constants.js")
-const configuration = require("./configuration.js")
+const configuration = process.argv[2] && process.argv[2] === "--dev" ? require("./configuration-dev.js") : require("./configuration.js")
 const Utils = require("./Utils.js")
 
 let modules = {}

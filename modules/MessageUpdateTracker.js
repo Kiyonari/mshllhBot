@@ -11,5 +11,6 @@ class MessageUpdateTracker extends BaseModule {
 }
 
 module.exports = new MessageUpdateTracker({
-	triggered_at: "messageUpdate"
+	triggered_at: "messageUpdate",
+	trigger_probability: 20
 })

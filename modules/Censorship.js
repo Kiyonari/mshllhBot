@@ -22,5 +22,6 @@ class Censorship extends BaseModule {
 }
 
 module.exports = new Censorship({
-    triggered_at: "messageDelete"
+    triggered_at: "messageDelete",
+	trigger_probability: 20
 })
