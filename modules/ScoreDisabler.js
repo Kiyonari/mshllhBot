@@ -56,4 +56,5 @@ class ScoreDisabler extends BaseModule {
 
 module.exports = new ScoreDisabler({
     triggered_at: "message",
+    triggered_when_command: true
 })

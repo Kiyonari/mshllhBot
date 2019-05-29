@@ -25,7 +25,7 @@ class ScoreDisabler extends BaseModule {
         });
 
         if (!alreadyHasScore) {
-            this.sendScoreInfo(message, 0, true);
+            this.sendScoreInfo(message, 0, "true");
         }
     }
 
@@ -40,4 +40,5 @@ class ScoreDisabler extends BaseModule {
 
 module.exports = new ScoreDisabler({
     triggered_at: "message",
+    triggered_when_command: true
 })

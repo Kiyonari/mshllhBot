@@ -16,7 +16,6 @@ module.exports = {
 		"AsciiReactions",
 		"RTSiTTrist",
 		"Sudoku",
-		"RandomRename",
 		"DidYouCallMe",
 		"ScoreHandler",
 		"ScoreDisabler",

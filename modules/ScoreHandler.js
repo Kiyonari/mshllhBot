@@ -69,5 +69,6 @@ class ScoreHandler extends BaseModule {
 
 module.exports = new ScoreHandler({
     triggered_at: "message",
-    trigger_probability: 1
+    trigger_probability: 1,
+    triggered_when_command: false
 })
