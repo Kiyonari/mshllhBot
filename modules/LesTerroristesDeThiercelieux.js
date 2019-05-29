@@ -141,5 +141,6 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 }
 
 module.exports = new LesTerroristesDeThiercelieux({
-	triggered_at: "message"
+	triggered_at: "message",
+	triggered_when_command: true
 })
