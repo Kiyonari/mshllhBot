@@ -18,5 +18,6 @@ class MashallahImageSender extends BaseModule {
 }
 
 module.exports = new MashallahImageSender({
-	triggered_at: "message"
+	triggered_at: "message",
+  triggered_when_command: false
 })

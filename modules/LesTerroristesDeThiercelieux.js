@@ -39,7 +39,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		if (!this.checkIfInitialized(message)) {
 			return ;
 		}
-		this.registerMember(message.author, message.guild.members.get(message.author.id).nickname, this.parseCommand(message.content, false).slice(1))
+		this.registerMember(message.author, message.guild.members.get(message.author.id), this.parseCommand(message.content, false).slice(1))
 	}
 
 	commandLaunch(message) {
@@ -57,6 +57,11 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	commandStop(message) {
+		for (i in this.data.members) {
+			if (this.data.members[i].original_nickname) {
+				message.guild.members.get(this.data.members[i].id).setNickname(this.data.members[i].original_nickname)
+			}
+		}
 		console.log("commandStop")
 	}
 
@@ -64,13 +69,15 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 // REGISTER
 
 
-	registerMember(member, nickname, custom_nickname) {
-		nickname = nickname ? nickname : member.username
+	registerMember(member, guild_member, custom_nickname) {
+		custom_nickname = custom_nickname.length ? custom_nickname[0] : ""
+		var nickname = guild_member.nickname ? guild_member.nickname : member.username
 		var final_nickname = custom_nickname != "" ? custom_nickname : nickname
 		var final_original_nickname = custom_nickname != "" ? nickname : null
 		this.data.members.push({id: member.id, nickname: final_nickname, original_nickname: final_original_nickname})
 
-		this.send(`**${final_nickname}** a rejoint la partie, ${["on s'enjaille", "on s'amuse", "vous pouvez quitter du coup", "niquez-le"][Utils.rand(3)]}`)
+		this.send(`**${final_nickname}** a rejoint la partie, ${["on s'enjaille", "on s'amuse", "vous pouvez quitter du coup"][Utils.rand(2)]}`)
+		guild_member.setNickname(final_nickname)
 		console.log(this.data.members)
 	}
 
@@ -85,6 +92,10 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 // INIT AND MISC
 
+
+	changeNickname(nickname) {
+
+	}
 
 	checkIfInitialized(message) {
 		if (!this.data.init) {

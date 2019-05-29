@@ -39,5 +39,6 @@ var reaction = function(emojis, str, message) {
 
 module.exports = new AsciiReactions({
 	triggered_at: "message",
-	trigger_probability: 30
+	trigger_probability: 30,
+	triggered_when_command: false
 })

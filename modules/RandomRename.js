@@ -11,5 +11,6 @@ class RandomRename extends BaseModule {
 
 module.exports = new RandomRename({
 	triggered_at: "message",
-	trigger_probability: 1
+	trigger_probability: 1,
+	triggered_when_command: false
 })

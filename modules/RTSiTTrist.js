@@ -11,5 +11,6 @@ class DMMshllhSender extends BaseModule {
 
 module.exports = new DMMshllhSender({
 	triggered_at: "message",
-	trigger_probability: 25
+	trigger_probability: 25,
+	triggered_when_command: false
 })

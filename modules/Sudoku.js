@@ -21,5 +21,6 @@ class Sudoku extends BaseModule {
 }
 
 module.exports = new Sudoku({
-    triggered_at: "message"
+    triggered_at: "message",
+    triggered_when_command: false
 })
