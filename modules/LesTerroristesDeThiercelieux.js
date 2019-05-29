@@ -66,8 +66,11 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	registerMember(member, nickname, custom_nickname) {
 		nickname = nickname ? nickname : member.username
-		var l = this.data.members.push({id: member.id, nickname: custom_nickname != "" ? custom_nickname : nickname, original_nickname: custom_nickname != "" ? nickname : null})
-		this.send(`**${this.data.members[l - 1].nickname}** a rejoint la partie, ${["on s'enjaille", "on s'amuse", "vous pouvez quitter du coup", "niquez-le"][Utils.rand(3)]}`)
+		var final_nickname = custom_nickname != "" ? custom_nickname : nickname
+		var final_original_nickname = custom_nickname != "" ? nickname : null
+		this.data.members.push({id: member.id, nickname: final_nickname, original_nickname: final_original_nickname})
+
+		this.send(`**${final_nickname}** a rejoint la partie, ${["on s'enjaille", "on s'amuse", "vous pouvez quitter du coup", "niquez-le"][Utils.rand(3)]}`)
 		console.log(this.data.members)
 	}
 
