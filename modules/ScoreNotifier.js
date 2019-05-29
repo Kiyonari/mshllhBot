@@ -1,7 +1,7 @@
 const BaseModule = require("./BaseModule.js")
 const fs = require("fs")
 
-class ScoreDisabler extends BaseModule {
+class ScoreNotifier extends BaseModule {
     canProcess(message) {
         return message.content.startsWith(this.constants.command_prefix + "score");
     }
@@ -38,7 +38,7 @@ class ScoreDisabler extends BaseModule {
     }
 }
 
-module.exports = new ScoreDisabler({
+module.exports = new ScoreNotifier({
     triggered_at: "message",
     triggered_when_command: true
 })
