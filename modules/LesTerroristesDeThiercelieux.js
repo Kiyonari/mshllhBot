@@ -1,6 +1,19 @@
 const BaseModule = require("./BaseModule.js")
 const Utils = require("../Utils.js")
 
+const c_roles = {
+	'werewolf': {
+		name: "Péon",
+	},
+	'werewolf': {
+		name: "Terroriste",
+	},
+}
+const c_roles_list = ["villager", "werewolf"]
+
+const c_rules = {
+}
+
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
 		conf.command_name = "graou";
@@ -28,10 +41,12 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	commandInit(message) {
 		this.data.channel = message.guild.channels.find('name', this.config.channel_name)
+		this.data.guild = message.guild
 		if (this.data.channel.id != message.channel.id) {
 			this.send(`Faut le faire dans <#${this.data.channel.id}>, gardons ce serveur calme et serein :3`, message.channel)
 		} else {
 			this.data.init = true
+			this.send(`Allez hop hop hop on fait un petit ${this.generateCommand("register (pseudo)")}, on se dépêche !`)
 		}
 	}
 
@@ -39,14 +54,25 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		if (!this.checkIfInitialized(message)) {
 			return ;
 		}
-		this.registerMember(message.author, message.guild.members.get(message.author.id), this.parseCommand(message.content, false).slice(1))
+		if (this.data.started) {
+			this.send(`Déso <@${message.author.id}>, c'est déjà lancé, t'avais qu'à être à l'heure wlh`)
+		} else {
+			this.registerMember(message.author, message.guild.members.get(message.author.id), this.parseCommand(message.content, false).slice(1))
+		}
 	}
 
-	commandLaunch(message) {
+	commandStart(message) {
 		if (!this.checkIfInitialized(message)) {
 			return ;
 		}
-		console.log("commandLaunch")
+		// if (this.data.members.length < 2) {
+		// 	this.send("Y'a même pas 2 personnes, ça va être triste, même pas je lance :cry:")
+		// 	this.reset()
+		// } else {
+			this.data.started = true
+			this.start()
+		// }
+		console.log("commandStart")
 	}
 
 	commandVote(message) {
@@ -57,12 +83,45 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	commandStop(message) {
-		for (i in this.data.members) {
+		this.send("C'est stoppé! De toute façon vous êtes tous nuls alors bon")
+		this.reset()
+		console.log("commandStop")
+	}
+
+
+// GAME
+
+
+	start() {
+		var notifs = ""
+		this.data.members.forEach(function(member) {
+			notifs += "<@" + member.id + "> "
+		})
+		this.send(`${notifs}Allez on est tipar ! J'attribue les rôles maintenant, checkez vos DM :3`)
+		this.setRoles()
+	}
+
+	setRoles() {
+		var _this = this
+		var conf = c_rules
+		var shuffled = this.shuffle(this.data.members)
+		shuffled.forEach(function(member) {
+		})
+	}
+
+
+// STOP
+
+
+	reset() {
+		for (var i in this.data.members) {
 			if (this.data.members[i].original_nickname) {
 				message.guild.members.get(this.data.members[i].id).setNickname(this.data.members[i].original_nickname)
 			}
 		}
-		console.log("commandStop")
+		this.data.members = []
+		this.data.init = false
+		this.data.started = false
 	}
 
 
@@ -70,6 +129,17 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 
 	registerMember(member, guild_member, custom_nickname) {
+		var found = false
+		var data = this
+		this.data.members.forEach(function(item) {
+			if (item.id == member.id) {
+				data.send(`Wlh <@${member.id}> tu croyais m'avoir, on se register pas 2 fois comme ça ici :rage:`)
+				found = true
+			}
+		})
+		if (found) {
+			return
+		}
 		custom_nickname = custom_nickname.length ? custom_nickname[0] : ""
 		var nickname = guild_member.nickname ? guild_member.nickname : member.username
 		var final_nickname = custom_nickname != "" ? custom_nickname : nickname
@@ -78,7 +148,6 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 		this.send(`**${final_nickname}** a rejoint la partie, ${["on s'enjaille", "on s'amuse", "vous pouvez quitter du coup"][Utils.rand(2)]}`)
 		guild_member.setNickname(final_nickname)
-		console.log(this.data.members)
 	}
 
 
@@ -92,10 +161,6 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 // INIT AND MISC
 
-
-	changeNickname(nickname) {
-
-	}
 
 	checkIfInitialized(message) {
 		if (!this.data.init) {
@@ -113,7 +178,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 			commands: {
 				"init": "commandInit",
 				"register": "commandRegister",
-				"launch": "commandLaunch",
+				"start": "commandStart",
 				"vote": "commandVote",
 				"stop": "commandStop",
 			},
@@ -138,6 +203,19 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	generateCommand(cmd) {
 		return `\`${this.constants.command_prefix + this.config.command_name} ${cmd}\``
 	}
+
+	shuffle(array) {
+    let counter = array.length;
+    while (counter > 0) {
+        let index = Utils.rand(counter - 1);
+        counter--;
+        let temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+}
 }
 
 module.exports = new LesTerroristesDeThiercelieux({
