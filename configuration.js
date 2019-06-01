@@ -17,9 +17,10 @@ module.exports = {
 		"RTSiTTrist",
 		"Sudoku",
 		"DidYouCallMe",
-		"ScoreHandler",
+		"RandomScoreAdder",
 		"ScoreDisabler",
-		"ScoreNotifier"
+		"ScoreNotifier",
+		"ScoreReactAdd"
 	],
 	events_configuration: {
 		'message': {
