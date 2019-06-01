@@ -1,8 +1,7 @@
-const BaseModule = require("./BaseModule.js")
 const fs = require("fs");
 
-class ScoreHandler extends BaseModule {
-    process(message) {
+class ScoreHandler {
+    addScore(message, value, reason) {
         const writerID = message.author.id;
         const buffer = fs.readFileSync("db/score.csv", () => { }).toString();
         const lines = buffer.split('\n');
@@ -16,10 +15,10 @@ class ScoreHandler extends BaseModule {
             const userConsent = user[2];
 
             if (writerID === userID) {
-                userScore++;
+                userScore = parseInt(userScore) + value;
                 if (userConsent === "true") {
                     this.changeUserName(message, userScore);
-                    this.sendSwagNotification(message, userScore);
+                    this.sendSwagNotification(message, userScore, reason);
                 }
                 alreadyHasScore = true;
             }
@@ -29,9 +28,9 @@ class ScoreHandler extends BaseModule {
         });
 
         if (!alreadyHasScore) {
-            newBuffer += writerID + ";1;true\n";
-            this.changeUserName(message, 1);
-            this.sendSwagNotification(message, 1);
+            newBuffer += writerID + ";" + value + ";true\n";
+            this.changeUserName(message, value);
+            this.sendSwagNotification(message, value, reason);
         }
 
         fs.writeFileSync("db/score.csv", newBuffer, () => { });
@@ -48,7 +47,7 @@ class ScoreHandler extends BaseModule {
         message.guild.members.get(message.author.id).setNickname(nickname);
     }
 
-    sendSwagNotification(message, score) {
+    sendSwagNotification(message, score, reason) {
         let messageBravo = "";
         if (score > 50) {
             messageBravo = "Bravo à <@" + message.author.id + "> qui accumule un " + score + "ème point de swag ! A ce niveau là ça en devient indécent wlh";
@@ -61,14 +60,11 @@ class ScoreHandler extends BaseModule {
         } else {
             messageBravo = "<@" + message.author.id + "> continue son ascension sociale ! Il a maintenant " + score + " points de swag !";
         }
+        messageBravo += "\nRaison : " + reason;
         message.channel.send(messageBravo, {
             tts: true
         });
     }
 }
 
-module.exports = new ScoreHandler({
-    triggered_at: "message",
-    trigger_probability: 1,
-    triggered_when_command: false
-})
+module.exports = new ScoreHandler({});
