@@ -12,5 +12,6 @@ class DidYouCallMe extends BaseModule {
 
 module.exports = new DidYouCallMe({
 	triggered_at: "message",
-	trigger_probability: 75
+	trigger_probability: 75,
+	triggered_when_command: false
 })
