@@ -1,18 +1,39 @@
 const BaseModule = require("./BaseModule.js")
 const Utils = require("../Utils.js")
 
-const c_roles = {
-	'werewolf': {
+const c_roles = [
+	{
+		id: 'villager',
 		name: "Péon",
+		ratio: 1,
 	},
-	'werewolf': {
+	{
+		id: 'werewolf',
 		name: "Terroriste",
+		ratio: 0.4,
+		mandatory: true
 	},
-}
-const c_roles_list = ["villager", "werewolf"]
-
-const c_rules = {
-}
+	{
+		id: 'hunter',
+		name: "Cancer",
+		ratio: 0.1,
+	},
+	{
+		id: 'clairvoyant',
+		name: "Témoin de Jéhovah",
+		ratio: 0.1,
+	},
+	{
+		id: 'cupidon',
+		name: "PornHub",
+		ratio: 0.1,
+	},
+	{
+		id: 'sorceress',
+		name: "Chimiothérapeute",
+		ratio: 0.1
+	}
+]
 
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
@@ -40,6 +61,23 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 
 	commandInit(message) {
+		// this.data.init = true
+		// this.data.started = true
+		// this.data.members.push({id: 0, nickname: "a", original_nickname: null})
+		// this.data.members.push({id: 1, nickname: "b", original_nickname: null})
+		// this.data.members.push({id: 2, nickname: "c", original_nickname: null})
+		// this.data.members.push({id: 3, nickname: "d", original_nickname: null})
+		// this.data.members.push({id: 4, nickname: "e", original_nickname: null})
+/*		this.data.members.push({id: 5, nickname: "f", original_nickname: null})
+		this.data.members.push({id: 6, nickname: "g", original_nickname: null})
+		this.data.members.push({id: 7, nickname: "h", original_nickname: null})
+		this.data.members.push({id: 8, nickname: "i", original_nickname: null})
+		this.data.members.push({id: 9, nickname: "j", original_nickname: null})
+*/
+//		this.setRoles()
+
+
+
 		this.data.channel = message.guild.channels.find('name', this.config.channel_name)
 		this.data.guild = message.guild
 		if (this.data.channel.id != message.channel.id) {
@@ -55,7 +93,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 			return ;
 		}
 		if (this.data.started) {
-			this.send(`Déso <@${message.author.id}>, c'est déjà lancé, t'avais qu'à être à l'heure wlh`)
+			this.send(`Déso <@${message.author.id}>, c'est déjà lancé, t'avais qu'à être à l'heure :3`)
 		} else {
 			this.registerMember(message.author, message.guild.members.get(message.author.id), this.parseCommand(message.content, false).slice(1))
 		}
@@ -76,16 +114,48 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	commandVote(message) {
-		if (!this.checkIfInitialized(message)) {
-			return ;
+		if (message.channel.type != "dm") {
+			if (!this.checkIfInitialized(message)) {
+				return ;
+			}
+			this.send("Pas ici voyons ! faudrait pas que tout le monde te voie !", message.channel)
+		} else {
+			if (!this.data.init || !this.data.started) {
+				this.send("Mshllh du calme, ça n'a même pas encore commencé", message.channel)
+			}
+			var name = this.parseCommand(message.content, false)[1]
+			if (name) {
+
+			} else {
+				this.send(`Un nom, ma parole, il me faut un nom ! Fais un ${this.generateCommand("list")} pour voir qui joue`)
+			}
 		}
-		console.log("commandVote")
 	}
 
 	commandStop(message) {
 		this.send("C'est stoppé! De toute façon vous êtes tous nuls alors bon")
 		this.reset()
 		console.log("commandStop")
+	}
+
+	commandList(message) {
+		if (!this.checkIfInitialized(message)) {
+			return ;
+		}
+		var _this = this
+		var see_werewolves = false
+		if (message.channel.type == "dm" && this.getMember('id', message.author.id) && this.getMember(message.author.id).role == "werewolf") {
+			see_werewolves = true
+		}
+		var txt = "Joueurs présents: \n"
+		this.data.members.forEach(function(member) {
+			txt += `- \`${member.nickname}\``
+			if (_this.data.started && member.role == "werewolf" && see_werewolves) {
+				txt += `  -- **${_this.getRole(member.role).name}**`
+			}
+			txt += "\n"
+		})
+		this.send(txt, message.channel)
 	}
 
 
@@ -99,13 +169,48 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		})
 		this.send(`${notifs}Allez on est tipar ! J'attribue les rôles maintenant, checkez vos DM :3`)
 		this.setRoles()
+		this.sendRoleDMs()
+	}
+
+	sendRoleDMs() {
+		var _this = this
+		this.data.members.forEach(function(member) {
+			_this.sendDM(`Eh bien ton rôle est: **${_this.getRole(member.role).name}**, félicitations !`, member.id)
+		})
 	}
 
 	setRoles() {
 		var _this = this
-		var conf = c_rules
+		var conf = []
+		for (var i in c_roles) {
+			var role = {id: c_roles[i].id, ratio: Math.floor(c_roles[i].ratio * this.data.members.length)}
+			if (role.ratio <= 0) {
+				if (c_roles[i].mandatory || Utils.rand() % 3 == 0) {
+					role.ratio = 1
+					role.mandatory = c_roles[i].mandatory
+				}
+				role.optional = !c_roles[i].mandatory
+			}
+			if (role.ratio > 0) {
+				conf.push(role)
+			}
+		}
+		conf.sort((a, b) => (a.ratio > b.ratio || b.mandatory ? 1 : (a.ratio == b.ratio ? (Utils.rand() % 2 == 0 ? 1 : -1) : -1)))
 		var shuffled = this.shuffle(this.data.members)
+		var current_role_id = 0
+		var current_role = conf[current_role_id]
 		shuffled.forEach(function(member) {
+			if (current_role.ratio > 0) {
+				member.role = current_role.id
+				current_role.ratio--;
+				if (current_role.ratio == 0) {
+					current_role_id++;
+					current_role = conf[current_role_id]
+				}
+			}
+		})
+		this.data.members.forEach(function(member) {
+			member.role = shuffled.find((i) => member.id == i.id).role
 		})
 	}
 
@@ -158,6 +263,10 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		(channel ? channel : this.data.channel).send(txt)
 	}
 
+	sendDM(txt, id) {
+		this.data.guild.members.get(id).send(txt)
+	}
+
 
 // INIT AND MISC
 
@@ -181,6 +290,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 				"start": "commandStart",
 				"vote": "commandVote",
 				"stop": "commandStop",
+				"list": "commandList",
 			},
 			command: {
 				args: null,
@@ -215,7 +325,15 @@ class LesTerroristesDeThiercelieux extends BaseModule {
     }
 
     return array;
-}
+	}
+
+	getRole(role) {
+		return c_roles.find((i) => (i.id == role))
+	}
+
+	getMember(key, value) {
+		return this.data.members.find((i) => i[key] == value)
+	}
 }
 
 module.exports = new LesTerroristesDeThiercelieux({
