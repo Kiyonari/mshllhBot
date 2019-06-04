@@ -16,24 +16,31 @@ const c_roles = [
 	{
 		id: 'hunter',
 		name: "Cancer",
+		fixed_number: 1,
 		ratio: 0.1,
 	},
 	{
 		id: 'clairvoyant',
 		name: "Témoin de Jéhovah",
+		fixed_number: 1,
 		ratio: 0.1,
 	},
 	{
 		id: 'cupidon',
-		name: "PornHub",
+		name: "Bébé avec un arc qui vole",
 		ratio: 0.1,
+		fixed_number: 1,
 	},
 	{
-		id: 'sorceress',
+		id: 'witch',
 		name: "Chimiothérapeute",
+		fixed_number: 1,
 		ratio: 0.1
 	}
 ]
+
+const c_play_order_start = ["cupidon"]
+const c_play_order = ["clairvoyant", "werewolf", "witch"]
 
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
@@ -49,10 +56,14 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	process(message) {
 		this.parseCommand(message.content)
-		if (this.data.commands[this.data.command.name]) {
-			this[this.data.commands[this.data.command.name]](message)
+		if (this.data.waiting_command && this.data.command.name != this.data.waiting_command) {
+			this.send(`Calmons-nous <@${message.author.id}>, j'attends quelqu'un et après on verra pour toi :3`)
 		} else {
-			this.send(`${this.generateCommand(this.data.command.name)} ça existe pas :rage:`, this.data.init ? this.data.channel : message.channel)
+			if (this.data.commands[this.data.command.name]) {
+				this[this.data.commands[this.data.command.name]](message)
+			} else {
+				this.send(`${this.generateCommand(this.data.command.name)} ça existe pas :rage:`, this.data.init ? this.data.channel : message.channel)
+			}
 		}
 	}
 
@@ -63,20 +74,13 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	commandInit(message) {
 		// this.data.init = true
 		// this.data.started = true
-		// this.data.members.push({id: 0, nickname: "a", original_nickname: null})
-		// this.data.members.push({id: 1, nickname: "b", original_nickname: null})
-		// this.data.members.push({id: 2, nickname: "c", original_nickname: null})
-		// this.data.members.push({id: 3, nickname: "d", original_nickname: null})
-		// this.data.members.push({id: 4, nickname: "e", original_nickname: null})
-/*		this.data.members.push({id: 5, nickname: "f", original_nickname: null})
-		this.data.members.push({id: 6, nickname: "g", original_nickname: null})
-		this.data.members.push({id: 7, nickname: "h", original_nickname: null})
-		this.data.members.push({id: 8, nickname: "i", original_nickname: null})
-		this.data.members.push({id: 9, nickname: "j", original_nickname: null})
-*/
-//		this.setRoles()
-
-
+		// this.data.members.push({id: 0, nickname: "a", original_nickname: null, role: 'werewolf'})
+		// this.data.members.push({id: 1, nickname: "b", original_nickname: null, role: 'villager'})
+		// this.data.members.push({id: 2, nickname: "c", original_nickname: null, role: 'werewolf'})
+		// this.data.members.push({id: 3, nickname: "d", original_nickname: null, role: 'witch'})
+		// this.data.members.push({id: 4, nickname: "e", original_nickname: null, role: 'hunter'})
+		// this.setRoles()
+		// return
 
 		this.data.channel = message.guild.channels.find('name', this.config.channel_name)
 		this.data.guild = message.guild
@@ -109,27 +113,32 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		// } else {
 			this.data.started = true
 			this.start()
+			this.launchStartTurn()
 		// }
 		console.log("commandStart")
 	}
 
 	commandVote(message) {
-		if (message.channel.type != "dm") {
-			if (!this.checkIfInitialized(message)) {
-				return ;
-			}
-			this.send("Pas ici voyons ! faudrait pas que tout le monde te voie !", message.channel)
-		} else {
-			if (!this.data.init || !this.data.started) {
-				this.send("Mshllh du calme, ça n'a même pas encore commencé", message.channel)
-			}
-			var name = this.parseCommand(message.content, false)[1]
-			if (name) {
-
-			} else {
-				this.send(`Un nom, ma parole, il me faut un nom ! Fais un ${this.generateCommand("list")} pour voir qui joue`)
-			}
+		if (!this.checkIfInitialized(message)) {
+			return ;
 		}
+
+		// if (message.channel.type != "dm") {
+		// 	this.send("Pas ici voyons ! faudrait pas que tout le monde te voie !", message.channel)
+		// } else {
+		// 	// if (!this.data.init || !this.data.started) {
+		// 	// 	this.send("Mshllh du calme, ça n'a même pas encore commencé", message.channel)
+		// 	// }
+		// 	var name = this.parseCommand(message.content, false)[1]
+		// 	if (name) {
+		// 		if (!this.getMember('name', name)) {
+		// 			this.send(`<@${message.author.id}> n'existe pas :'(")
+		// 		}
+		// 		voteForMember(name)
+		// 	} else {
+		// 		this.send(`Un nom, ma parole, il me faut un nom ! Fais un ${this.generateCommand("list")} pour voir qui joue`)
+		// 	}
+		// }
 	}
 
 	commandStop(message) {
@@ -158,9 +167,94 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		this.send(txt, message.channel)
 	}
 
+	commandMarry(message) {
+		if (!this.checkIfInitialized(message)) {
+			return ;
+		}
+		if (this.data.waiting_command == 'marry') {
+			if (message.channel.type == "dm") {
+				this.data.waiting_command = null
+				console.log("marry", this.data.command)
+			} else {
+				this.send(`En DM <@${message.author.id}> stp, faudrait pas qu'on nous voit :3`, message.channel)
+			}
+		} else {
+			this.send(`Pas si vite <@${message.author.id}>, tu peux pas faire ça maintenant !`, message.channel)
+		}
+	}
 
-// GAME
 
+/*
+ * GAME
+ */
+
+
+// TURNS
+
+	werewolfTurn(startup = false) {
+		if (startup) {
+			var list = this.getMembersList(this.getMembers('werewolf'))
+			var _this = this
+			this.getMembers('werewolf').forEach(function(member) {
+				_this.sendDM(`Voici tes coéquipiers: \n${list}`, member.id)
+			})
+		} else {
+		}
+	}
+
+	cupidonTurn(startup = false) {
+		var cupidon = this.getMember('role', 'cupidon')
+		if (startup) {
+			this.data.waiting_command = "marry"
+			this.sendDM(`Voici les joueurs:\n${this.getMembersList(this.data.members)}\n\nFais un ${this.generateCommand("marry pseudo_1 pseudo_2")} pour lier 2 personnes entre elles _(c'est rigolo, on s'amuse)_`, cupidon.id)
+		} else {
+		}
+	}
+
+	villagerTurn(startup = false) {
+		if (startup) {
+		} else {
+		}
+	}
+
+	hunterTurn(startup = false) {
+		if (startup) {
+		} else {
+		}
+	}
+
+	clairvoyantTurn(startup = false) {
+		if (startup) {
+		} else {
+		}
+	}
+
+	witchTurn(startup = false) {
+		if (startup) {
+		} else {
+		}
+	}
+
+
+// START
+
+	launchStartTurn() {
+		this.send("Les Terroristes vont pouvoir se reconnaître, _ces fdp_, 2 secondes...")
+		this.werewolfTurn(true)
+		var _this = this
+		setTimeout(function() {
+			var next_timeout = 500
+			var cupidon = _this.getMember('role', 'cupidon')
+			_this.send("Maintenant au bébé avec un arc qui vole, notre ami à tous...")
+			if (cupidon) {
+				_this.cupidonTurn(true)
+			} else {
+				setTimeout(function() {
+					_this.send("C'est tout bon, on peut commencer !")
+				}, 2500 + Utils.rand(1500)
+			}
+		}, 500)
+	}
 
 	start() {
 		var notifs = ""
@@ -183,19 +277,31 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		var _this = this
 		var conf = []
 		for (var i in c_roles) {
-			var role = {id: c_roles[i].id, ratio: Math.floor(c_roles[i].ratio * this.data.members.length)}
-			if (role.ratio <= 0) {
-				if (c_roles[i].mandatory || Utils.rand() % 3 == 0) {
+			var role = {id: c_roles[i].id, mandatory: c_roles[i].mandatory ? true : false, optional: !c_roles[i].mandatory}
+			if (c_roles[i].fixed_number) {
+				role.ratio = c_roles[i].fixed_number
+			} else {
+				role.ratio = Math.floor(c_roles[i].ratio * this.data.members.length)
+				if (role.ratio <= 0) {
 					role.ratio = 1
-					role.mandatory = c_roles[i].mandatory
 				}
-				role.optional = !c_roles[i].mandatory
 			}
-			if (role.ratio > 0) {
+			if (!role.mandatory && Utils.rand() % 3 == 0) {
+				role.optional = true
+			}
+			if (role.mandatory || Utils.rand() % 4) {
 				conf.push(role)
 			}
 		}
-		conf.sort((a, b) => (a.ratio > b.ratio || b.mandatory ? 1 : (a.ratio == b.ratio ? (Utils.rand() % 2 == 0 ? 1 : -1) : -1)))
+		conf.sort(function(a, b) {
+			if ((a.ratio > b.ratio && !b.mandatory) || a.mandatory) {
+				return -1;
+			} else if (a.ratio == b.ratio) {
+				return a.mandatory ? -1 : (b.mandatory ? 1 : 0)
+			} else {
+				return 1
+			}
+		})
 		var shuffled = this.shuffle(this.data.members)
 		var current_role_id = 0
 		var current_role = conf[current_role_id]
@@ -205,7 +311,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 				current_role.ratio--;
 				if (current_role.ratio == 0) {
 					current_role_id++;
-					current_role = conf[current_role_id]
+					current_role = current_role_id == conf.length ? 'villager' : conf[current_role_id]
 				}
 			}
 		})
@@ -291,12 +397,14 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 				"vote": "commandVote",
 				"stop": "commandStop",
 				"list": "commandList",
+				"marry": "commandMarry",
 			},
 			command: {
 				args: null,
 				name: null,
 			},
 			channel: null,
+			playing_role: "",
 		}
 	}
 
@@ -333,6 +441,29 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	getMember(key, value) {
 		return this.data.members.find((i) => i[key] == value)
+	}
+
+	getMembers(role) {
+		var members = []
+		if (role) {
+			this.data.members.forEach(function(member) {
+				if (member.role == role) {
+					members.push(member)
+				}
+			})
+		} else {
+			members = this.data.members
+		}
+		return members
+	}
+
+	getMembersList(array, show_role) {
+		var txt = ""
+		var _this = this
+		array.forEach(function(member) {
+			txt += ` - **${member.nickname}**${member.role == show_role || show_role == 'all' ? `  -- **${_this.getRole(member.role).name}**` : ``}\n`
+		})
+		return txt
 	}
 }
 
