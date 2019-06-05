@@ -20,7 +20,8 @@ module.exports = {
 		"RandomScoreAdder",
 		"ScoreDisabler",
 		"ScoreNotifier",
-		"ScoreReactAdd"
+		"ScoreReactAdd",
+		"TwitchEmotes"
 	],
 	events_configuration: {
 		'message': {
