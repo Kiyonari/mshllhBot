@@ -4,8 +4,8 @@ const ScoreHandler = require('./ScoreHandler.js');
 
 class ScoreDisabler extends BaseModule {
     canProcess(message) {
-        return message.content.startsWith(this.constants.command_prefix + "disableScore") ||
-                message.content.startsWith(this.constants.command_prefix + "enableScore");
+        return message.content.startsWith(this.constants.command_prefix + "disablescore") ||
+                message.content.startsWith(this.constants.command_prefix + "enablescore");
     }
 
     process(message) {
@@ -43,7 +43,7 @@ class ScoreDisabler extends BaseModule {
     }
 
     getUserConsent(message) {
-        return message.content.includes("disableScore") ? false : true;
+        return message.content.includes("disablescore") ? false : true;
     }
 
     getBackToNormalName(message, score) {
