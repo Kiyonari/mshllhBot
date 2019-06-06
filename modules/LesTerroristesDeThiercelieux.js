@@ -1,6 +1,8 @@
 const BaseModule = require("./BaseModule.js")
 const Utils = require("../Utils.js")
 
+const Discord = require("discord.js")
+
 const c_roles = [
 	{
 		id: 'villager',
@@ -68,6 +70,36 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 
+	commandTest(message) {
+		// message.guild.createChannel('daesh', "text", {
+		// 	permissionOverwrites: [{
+		// 		id: "375433699732226050",
+
+		// 	},
+		// 	]
+		// }).then(function() {
+		// 	console.log("ok")
+		// })
+
+//		var perm = new Discord.Permissions(Discord.Permissions.ALL)
+		message.guild.createChannel('daesh', {type: "text",
+			permissionOverwrites: [
+		  {
+		  	id: message.guild.members.get("312922436691558422"),
+		  	deny: ["SEND_MESSAGES"],
+			},
+			{
+		    id: message.guild.members.get(message.author.id),
+		    deny: ['SEND_MESSAGES'],
+		  },
+		  ]
+		}).then(function() {
+			console.log("coucou")
+		})
+
+//		message.guild.members.get(this.data.members[i].id)
+	}
+
 // GAME COMMANDS
 
 
@@ -89,6 +121,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		} else {
 			this.data.init = true
 			this.send(`Allez hop hop hop on fait un petit ${this.generateCommand("register (pseudo)")}, on se dépêche !`)
+			this.registerMember(message.author, message.guild.members.get(message.author.id), [])
 		}
 	}
 
@@ -107,25 +140,27 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		if (!this.checkIfInitialized(message)) {
 			return ;
 		}
-		// if (this.data.members.length < 2) {
-		// 	this.send("Y'a même pas 2 personnes, ça va être triste, même pas je lance :cry:")
-		// 	this.reset()
-		// } else {
+		if (this.data.members.length < 2) {
+			this.send("Y'a même pas 2 personnes, ça va être triste, même pas je lance :cry:")
+			this.reset()
+		} else {
+			this.data.turn = 0
 			this.data.started = true
 			this.start()
 			this.launchStartTurn()
-		// }
-		console.log("commandStart")
+		}
 	}
 
 	commandVote(message) {
 		if (!this.checkIfInitialized(message)) {
 			return ;
 		}
-
 		// if (message.channel.type != "dm") {
 		// 	this.send("Pas ici voyons ! faudrait pas que tout le monde te voie !", message.channel)
 		// } else {
+		// 	if (this.getMember('id', message.author.id).role != 'werewolf') {
+
+		// 	}
 		// 	// if (!this.data.init || !this.data.started) {
 		// 	// 	this.send("Mshllh du calme, ça n'a même pas encore commencé", message.channel)
 		// 	// }
@@ -142,7 +177,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	commandStop(message) {
-		this.send("C'est stoppé! De toute façon vous êtes tous nuls alors bon")
+		this.send("C'est stoppé ! De toute façon vous êtes tous nuls alors bon")
 		this.reset()
 		console.log("commandStop")
 	}
@@ -171,10 +206,18 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		if (!this.checkIfInitialized(message)) {
 			return ;
 		}
-		if (this.data.waiting_command == 'marry') {
+		if (this.data.waiting_command == 'marry' && this.data.turn == 0) {
 			if (message.channel.type == "dm") {
+				var m1 = this.getMember('nickname', this.data.command.args[0])
+				var m2 = this.getMember('nickname', this.data.command.args[1])
+				if (!m1 || !m2) {
+					this.sendDM(`Y'en a un des 2 (ou les 2) qui n'existe(nt) pas...\nVoilà la liste:\n${this.getMembersList(this.data.members)}`)
+				} else {
+					this.marryMembers(m1, m2)
+				}
 				this.data.waiting_command = null
-				console.log("marry", this.data.command)
+				this.data.turn = 1
+				this.send("C'est tout bon, on peut commencer !")
 			} else {
 				this.send(`En DM <@${message.author.id}> stp, faudrait pas qu'on nous voit :3`, message.channel)
 			}
@@ -183,6 +226,12 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		}
 	}
 
+	marryMembers(m1, m2) {
+		m1.married = m2.id
+		m2.married = m1.id
+		this.sendDM(`Eh bien tu es marié, félicitations ! _mskn_\n\nTon charmant partenaire est: **${m1.nickname}**`, m2.id)
+		this.sendDM(`Eh bien tu es marié, félicitations ! _mskn_\n\nTon charmant partenaire est: **${m2.nickname}**`, m1.id)
+	}
 
 /*
  * GAME
@@ -251,7 +300,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 			} else {
 				setTimeout(function() {
 					_this.send("C'est tout bon, on peut commencer !")
-				}, 2500 + Utils.rand(1500)
+				}, 4500 + Utils.rand(1500))
 			}
 		}, 500)
 	}
@@ -344,7 +393,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		var data = this
 		this.data.members.forEach(function(item) {
 			if (item.id == member.id) {
-				data.send(`Wlh <@${member.id}> tu croyais m'avoir, on se register pas 2 fois comme ça ici :rage:`)
+				data.send(`<@${member.id}> tu croyais m'avoir, on se register pas 2 fois comme ça ici :rage:`)
 				found = true
 			}
 		})
@@ -398,6 +447,8 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 				"stop": "commandStop",
 				"list": "commandList",
 				"marry": "commandMarry",
+
+				"test": "commandTest"
 			},
 			command: {
 				args: null,
