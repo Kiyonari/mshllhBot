@@ -26,10 +26,10 @@ module.exports = {
 	events_configuration: {
 		'message': {
 			onEvent: function(message) {
-				return !message.author.bot && message.author.id != constants.bot_id
+				return true;
 			},
 			onProcess: function(mod, message) {
-				if (message.content[0] != constants.command_prefix) {
+				if (message.content[0] != constants.command_prefix && message.author.bot ? mod.config.allow_bot_reaction : true) {
 					return true
 				} else {
 					return mod.config.triggered_when_command ? true : false

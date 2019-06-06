@@ -29,5 +29,6 @@ class ScoreReactAdd extends BaseModule {
 
 module.exports = new ScoreReactAdd({
     triggered_at: "message",
-    triggered_when_command: false
+    triggered_when_command: false,
+    allow_bot_reaction: true
 })
