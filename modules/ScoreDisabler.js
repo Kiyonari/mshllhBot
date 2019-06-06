@@ -47,7 +47,8 @@ class ScoreDisabler extends BaseModule {
     }
 
     getBackToNormalName(message, score) {
-        let nickname = message.guild.members.get(message.author.id).nickname;
+        let guildUser = message.guild.members.get(message.author.id);
+        let nickname = guildUser.nickname ? guildUser.nickname : guildUser.user.username;
         const regex = new RegExp(/^\[[\d]+\]/, 'gm');
         nickname = nickname.replace(regex, '');
         message.guild.members.get(message.author.id).setNickname(nickname);
