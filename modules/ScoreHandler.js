@@ -37,7 +37,8 @@ class ScoreHandler {
     }
 
     changeUserName(message, score) {
-        let nickname = message.guild.members.get(message.author.id).nickname;
+        let guildUser = message.guild.members.get(message.author.id);
+        let nickname = guildUser.nickname ? guildUser.nickname : guildUser.user.username;
         const newScore = '[' + score + ']';
         const regex = new RegExp(/^\[[\d]+\]/, 'gm');
         nickname = nickname.replace(regex, newScore);

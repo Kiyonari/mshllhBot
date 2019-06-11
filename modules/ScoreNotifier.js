@@ -33,7 +33,7 @@ class ScoreNotifier extends BaseModule {
         let consentText = consent === "true" ? "activé" : "désactivé";
         let messageInfo = "<@" + message.author.id + "> possède " + score + " swagpoints.\n" +
         "Il a " + consentText + " l'affichage des swagpoints dans son nom\n" +
-        "!disableScore pour désactiver l'affichage, !enableScore pour le réactiver";
+        "!disablescore pour désactiver l'affichage, !enablescore pour le réactiver";
         message.channel.send(messageInfo);
     }
 }
