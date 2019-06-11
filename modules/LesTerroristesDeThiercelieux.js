@@ -322,6 +322,9 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		}
 	}
 
+
+
+
 	parseCommand(txt, fill_data = true) {
 		var cmd = txt.split(" ")
 		cmd.splice(0, 1)
@@ -360,11 +363,11 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	getMembers(role) {
 		var members = []
 		if (role) {
-			this.data.members.forEach(function(member) {
+			for (member of this.data.members) {
 				if (member.role == role) {
 					members.push(member)
 				}
-			})
+			}
 		} else {
 			members = this.data.members
 		}
@@ -373,10 +376,9 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	getMembersList(array, show_role) {
 		var txt = ""
-		var _this = this
-		array.forEach(function(member) {
+		for (member of array) {
 			txt += ` - **${member.nickname}**${member.role == show_role || show_role == 'all' ? `  -- **${_this.getRole(member.role).name}**` : ``}\n`
-		})
+		}
 		return txt
 	}
 }
