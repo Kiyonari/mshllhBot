@@ -96,19 +96,19 @@ class MemberFactory {
 
 class Member {
 	constructor() {
-		this.data = {
-			nickname: '',
-			id: ''
-			roles: [],
-			discord: {
-				guild_member: null,
-				id: null,
-			}
+		this.nickname = ''
+		this.id = ''
+		this.roles = []
+		this.discord = {
+			guild_member: null,
+			id: null
 		}
 	}
 
 	init(data) {
-		this.data = data
+		for (var i in data) {
+			this[i] = data[i]
+		}
 	}
 
 	send(txt, timeout = 0) {
@@ -139,18 +139,19 @@ class ChannelFactory {
 
 class Channel {
 	constructor() {
-		this.data = {
-			id: '',
-			role: '',
-			discord: {
-				channel: null,
-				id: null
-			}
+		this.id = ''
+		this.lobby = false
+		this.role = ''
+		this.discord = {
+			channel: null,
+			id: null
 		}
 	}
 
 	init(data) {
-		this.data = data
+		for (var i in data) {
+			this[i] = data[i]
+		}
 	}
 
 	send(txt, timeout = 0) {
@@ -173,15 +174,15 @@ class Channel {
 	}
 
 	disable() {
-
+		setSendMessagesState(false)
 	}
 
 	enable() {
-
+		setSendMessagesState(true)
 	}
 
 	flush() {
-
+		this.discord.channel.fetchMessages().then(messages => this.discord.channel.bulkDelete(messages));
 	}
 }
 
@@ -204,14 +205,14 @@ class RoleFactory {
 
 class Role {
 	constructor() {
-		this.data = {
-			id: '',
-			name: '',
-		}
+		this.id = ''
+		this.name = ''
 	}
 
 	init(data) {
-		this.data = data
+		for (var i in data) {
+			this[i] = data[i]
+		}
 	}
 }
 
@@ -234,14 +235,14 @@ class CommandFactory {
 
 class Command {
 	constructor() {
-		this.data = {
-			authorized_channels: [],
-			required_status: ''
-		}
+		this.authorized_channels = []
+		this.required_status = ''
 	}
 
 	init(data) {
-		this.data = data
+		for (var i in data) {
+			this[i] = data[i]
+		}
 	}
 
 	exec(message) {
@@ -257,6 +258,40 @@ var _channels = new ChannelFactory()
 var _commands = new CommandFactory()
 
 
+
+
+
+
+
+class LesTerroristesDeThiercelieux extends BaseModule {
+	constructor(conf) {
+		conf.command_name = "graou";
+		conf.admin_role = '586169000623341588';
+		super(conf)
+		this.init()
+	}
+
+	canProcess(message) {
+		return message.content.split(" ")[0] == this.constants.command_prefix + this.config.command_name
+	}
+
+	process(message) {
+	}
+
+	init() {
+
+	}
+}
+
+module.exports = new LesTerroristesDeThiercelieux({
+	triggered_at: "message",
+	triggered_when_command: true
+})
+
+
+
+
+/*
 
 
 class LesTerroristesDeThiercelieux extends BaseModule {
@@ -727,6 +762,25 @@ module.exports = new LesTerroristesDeThiercelieux({
 	triggered_at: "message",
 	triggered_when_command: true
 })
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*
