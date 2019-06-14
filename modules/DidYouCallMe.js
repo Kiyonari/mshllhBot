@@ -2,7 +2,7 @@ const BaseModule = require("./BaseModule.js")
 
 class DidYouCallMe extends BaseModule {
 	canProcess(message) {
-		return message.content.includes("<@" + this.constants.bot_id + ">")
+		return message.mentions.users.exists("id", this.constants.bot_id);
 	}
 
 	process(message) {
