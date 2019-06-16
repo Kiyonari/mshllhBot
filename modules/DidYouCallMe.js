@@ -2,7 +2,7 @@ const BaseModule = require("./BaseModule.js")
 
 class DidYouCallMe extends BaseModule {
 	canProcess(message) {
-		return message.content.includes("<@" + this.constants.bot_id + ">")
+		return message.mentions.users.exists("id", this.constants.bot_id);
 	}
 
 	process(message) {
@@ -12,6 +12,6 @@ class DidYouCallMe extends BaseModule {
 
 module.exports = new DidYouCallMe({
 	triggered_at: "message",
-	trigger_probability: 75,
+	trigger_probability: 30,
 	triggered_when_command: false
 })
