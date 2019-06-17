@@ -18,8 +18,8 @@ configuration.modules.forEach(function(name) {
     modules[mod.config.triggered_at][name] = mod
 })
 
-modules["message"]["LesTerroristesDeThiercelieux"].init()
-return
+// modules["message"]["LesTerroristesDeThiercelieux"].init()
+// return
 
 configuration.events.forEach(function(event_name) {
     client.on(event_name, function(p1, p2, p3) {

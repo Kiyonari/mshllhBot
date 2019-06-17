@@ -3,52 +3,8 @@ const Utils = require("../Utils.js")
 
 const Discord = require("discord.js")
 
-const c_roles = [
-	{
-		id: 'villager',
-		name: "Péon",
-		ratio: 1,
-	},
-	{
-		id: 'werewolf',
-		name: "Terroriste",
-		ratio: 0.4,
-		mandatory: true
-	},
-	{
-		id: 'hunter',
-		name: "Cancer",
-		fixed_number: 1,
-		ratio: 0.1,
-	},
-	{
-		id: 'clairvoyant',
-		name: "Témoin de Jéhovah",
-		fixed_number: 1,
-		ratio: 0.1,
-	},
-	{
-		id: 'cupidon',
-		name: "Bébé avec un arc qui vole",
-		ratio: 0.1,
-		fixed_number: 1,
-	},
-	{
-		id: 'witch',
-		name: "Chimiothérapeute",
-		fixed_number: 1,
-		ratio: 0.1
-	}
-]
-
 const c_play_order_start = ["cupidon"]
 const c_play_order = ["clairvoyant", "werewolf", "witch"]
-
-
-
-
-
-
 
 class Log {
 	static send(txt, channel, timeout = 0) {
@@ -59,12 +15,6 @@ class Log {
 		}
 	}
 }
-
-
-
-
-
-
 
 
 class MemberFactory {
@@ -134,6 +84,10 @@ class ChannelFactory {
 		channel.init(data)
 		this.channels.push(channel)
 		return channel
+	}
+
+	getDefaultLobby() {
+		return this.channels.find((i) => (i.id == 'lobby'))
 	}
 }
 
@@ -231,6 +185,10 @@ class CommandFactory {
 		this.commands.push(command)
 		return command
 	}
+
+	findById(id) {
+		return this.commands.find((i) => (i.id == id))
+	}
 }
 
 class Command {
@@ -245,8 +203,11 @@ class Command {
 		}
 	}
 
-	exec(message) {
+	canExec(args) {
+		return true
+	}
 
+	exec(args) {
 	}
 }
 
@@ -256,12 +217,6 @@ var _members = new MemberFactory()
 var _roles = new RoleFactory()
 var _channels = new ChannelFactory()
 var _commands = new CommandFactory()
-
-
-
-
-
-
 
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
@@ -276,10 +231,61 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	process(message) {
+		var command = this.parseCommand(message.content)
+		var found = _commands.findById(command.id)
+		if (found) {
+			if (found.canExec(command.args)) {
+				found.exec(command.args)
+			}
+		} else {
+			Log.send(`${_commands.format(command.id)} ça n'existe pas :rage:`, _channels.getDefaultLobby())
+		}
 	}
 
 	init() {
+		this.createRoles()
+		this.createChannels()
+		this.createCommands()
+	}
 
+	createRoles() {
+		_roles.create({ id: 'villager', name: "Péon", ratio: 1 })
+		_roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
+		_roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
+		_roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
+		_roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
+		_roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
+	}
+
+	createCommands() {
+		_commands.create({id: 'init', required_status: 'init', authorized_channels: ['lobby'] })
+		_commands.create({id: 'register', required_status: 'init', authorized_channels: ['lobby'] })
+		_commands.create({id: 'start', required_status: 'init', authorized_channels: ['lobby'] })
+		_commands.create({id: 'vote',required_status: 'start', authorized_channels: ['lobby'] })
+		_commands.create({id: 'stop', required_status: 'init', authorized_channels: ['lobby'] })
+		_commands.create({id: 'list', required_status: 'init', authorized_channels: ['lobby'] })
+		_commands.create({id: 'marry',required_status: 'start', authorized_channels: [] })
+		_commands.create({id: 'test', required_status: 'init', authorized_channels: ['lobby', 'history', 'general'] })
+	}
+
+	createChannels() {
+		_channels.create({ id: 'lobby', discord: { id: '586174272687308830' }, lobby: true })
+		_channels.create({ id: 'history', discord: { id: '586169619564199956' }, lobby: true })
+		_channels.create({ id: 'general', discord: { id: '586168794087686145' }, lobby: true })
+		_channels.create({ id: 'villager-channel', role: 'villager', discord: { id: '586169842135072776' }, lobby: false })
+		_channels.create({ id: 'werewolf-channel', role: 'werewolf', discord: { id: '586171506673844234' }, lobby: false })
+		_channels.create({ id: 'witch-channel', role: 'witch', discord: { id: '586170490180337675' }, lobby: false })
+		_channels.create({ id: 'cupidon-channel', role: 'cupidon', discord: { id: '586176105116073994' }, lobby: false })
+		_channels.create({ id: 'clairvoyant-channel', role: 'clairvoyant', discord: { id: '586170550095708171' }, lobby: false })
+		_channels.create({ id: 'hunter-channel', role: 'hunter', discord: { id: '586170721341014056' }, lobby: false })
+		_channels.create({ id: 'dead-channel', role: 'dead', discord: { id: '586169866294394881' }, lobby: false })
+	}
+
+	parseCommand(txt) {
+		var cmd = txt.split(" ")
+		cmd.splice(0, 1)
+		var obj = {id: cmd.splice(0, 1), args: cmd}
+		return obj
 	}
 }
 
@@ -676,16 +682,16 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 			},
 			channels: {
 				config: [
-					{ id: 'lobby', name: 'lobby', discord_id: '586174272687308830' },
-					{ id: 'history', name: 'historique', discord_id: '586169619564199956' },
-					{ id: 'general', name: 'general', discord_id: '586168794087686145' },
-					{ id: 'villager-channel', name: 'place-du-village', discord_id: '586169842135072776', role_channel: true },
-					{ id: 'werewolf-channel', name: 'bled', discord_id: '586171506673844234', role_channel: true },
-					{ id: 'witch-channel', name: 'service-de-chimio', discord_id: '586170490180337675', role_channel: true },
-					{ id: 'cupidon-channel', name: 'love-motel', discord_id: '586176105116073994', role_channel: true },
-					{ id: 'clairvoyant-channel', name: 'eglise-de-jehovah', discord_id: '586170550095708171', role_channel: true },
-					{ id: 'hunter-channel', name: 'sois-paliatifs', discord_id: '586170721341014056', role_channel: true },
-					{ id: 'dead-channel', name: 'cimetière', discord_id: '586169866294394881', role_channel: true },
+					{ id: 'lobby', , discord_id: '586174272687308830' },
+					{ id: 'history', , discord_id: '586169619564199956' },
+					{ id: 'general', , discord_id: '586168794087686145' },
+					{ id: 'villager-channel', , discord_id: '586169842135072776', role_channel: true },
+					{ id: 'werewolf-channel', , discord_id: '586171506673844234', role_channel: true },
+					{ id: 'witch-channel', , discord_id: '586170490180337675', role_channel: true },
+					{ id: 'cupidon-channel', , discord_id: '586176105116073994', role_channel: true },
+					{ id: 'clairvoyant-channel', , discord_id: '586170550095708171', role_channel: true },
+					{ id: 'hunter-channel', , discord_id: '586170721341014056', role_channel: true },
+					{ id: 'dead-channel', , discord_id: '586169866294394881', role_channel: true },
 				]
 			},
 			min_players: 1
