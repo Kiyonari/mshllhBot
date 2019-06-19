@@ -32,6 +32,10 @@ class MemberFactory {
 		}
 		return res
 	}
+
+	all() {
+		return this.members
+	}
 }
 
 module.exports = new MemberFactory()

@@ -16,6 +16,18 @@ class RoleFactory {
 		this.commands.push(obj)
 		return obj
 	}
+
+	get(id) {
+		return this.find((i) => (this.id == id))
+	}
+
+	find(fn) {
+		return this.roles.find(fn)
+	}
+
+	all() {
+		return this.roles
+	}
 }
 
 

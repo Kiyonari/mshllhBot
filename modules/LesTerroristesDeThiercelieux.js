@@ -66,12 +66,12 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	createRoles() {
-		// _globals.roles.create({ id: 'villager', name: "Péon", ratio: 1 })
-		// _globals.roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
-		// _globals.roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
-		// _globals.roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
-		// _globals.roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
-		// _globals.roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
+		_globals.roles.create({ id: 'villager', name: "Péon", ratio: 1 })
+		_globals.roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
+		_globals.roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
+		_globals.roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
+		_globals.roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
+		_globals.roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
 	}
 
 	createCommands() {

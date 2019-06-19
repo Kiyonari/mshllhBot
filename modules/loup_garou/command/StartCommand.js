@@ -12,7 +12,72 @@ class Start extends Command {
 	exec(message, args) {
 		this.globals.log.send(`C'est tipar !`)
 		this.game.status = 'start'
+
+		this.setRoles()
+		this.startGame()
 	}
+
+	setRoles() {
+		var conf = []
+		for (var role of this.globals.roles.all()) {
+			var role = {id: role.id, mandatory: role.mandatory ? true : false, optional: !role.mandatory}
+			if (role.fixed_number) {
+				role.ratio = role.fixed_number
+			} else {
+				role.ratio = Math.floor(role.ratio * this.globals.members.all().length)
+				if (role.ratio <= 0) {
+					role.ratio = 1
+				}
+			}
+			if (!role.mandatory && Utils.rand() % 3 == 0) {
+				role.optional = true
+			}
+			if (role.mandatory || Utils.rand() % 4) {
+				conf.push(role)
+			}
+		}
+		conf.sort(function(a, b) {
+			if ((a.ratio > b.ratio && !b.mandatory) || a.mandatory) {
+				return -1;
+			} else if (a.ratio == b.ratio) {
+				return a.mandatory ? -1 : (b.mandatory ? 1 : 0)
+			} else {
+				return 1
+			}
+		})
+		var shuffled = this.shuffle(this.globals.members.all())
+		var current_role_id = 0
+		var current_role = conf[current_role_id]
+		shuffled.forEach(function(member) {
+			if (current_role.ratio > 0) {
+				member.role = current_role.id
+				current_role.ratio--;
+				if (current_role.ratio == 0) {
+					current_role_id++;
+					current_role = current_role_id == conf.length ? 'villager' : conf[current_role_id]
+				}
+			}
+		})
+		this.globals.members.all().forEach(function(member) {
+			member.setRole(this.globals.roles.get(shuffled.find((i) => member.id == i.id).role))
+		})
+	}
+
+	shuffle(array) {
+    let counter = array.length;
+    while (counter > 0) {
+        let index = Utils.rand(counter - 1);
+        counter--;
+        let temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+	}
+
+
+
 }
 
 module.exports = new Start({
