@@ -6,17 +6,21 @@ class MemberFactory {
 	}
 
 	create(data) {
-		var member = new Member()
+		var member = new Member(data)
 		member.constants = this.constants
 		member.globals = this.globals
 		member.game = this.game
-		member.init(data)
+		member.init()
 		this.members.push(member)
 		return member
 	}
 
 	findUnique(fn) {
 		return this.members.find(fn)
+	}
+
+	get(discord_id) {
+		return this.members.find((i) => (i.discord.id == discord_id))
 	}
 
 	find(fn) {

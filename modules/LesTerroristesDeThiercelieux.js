@@ -9,7 +9,7 @@ const BaseModule = require("./BaseModule.js")
 var _globals = require("./loup_garou/globals.js")
 
 var _game = {
-	status: 'stopped',
+	status: 'stop',
 	turn: 0
 }
 
@@ -29,14 +29,24 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		if (!this.config.initialized) {
 			this.init(message)
 		}
-		var command = this.parseCommand(message.content)
-		var found = _globals.commands.findById(command.id)
-		if (found) {
-			if (found.canExec(message, command.args)) {
-				found.exec(command.args)
-			}
+		var channel = _globals.channels.find((i) => i.discord.id == message.channel.id)
+		if (!channel) {
+			_globals.log.send(`<@${message.author.id}> a fait un ${_globals.commands.format(command.id)} dans le channel \`${message.channel.name}\`, mais je ne le connais pas :'(`, message.channel)
 		} else {
-			_globals.log.send(`${_globals.commands.format(command.id)} ça n'existe pas :rage:`, _globals.channels.getDefaultLobby())
+			var parsed = this.parseCommand(message.content)
+			var command = _globals.commands.get(parsed.id)
+			if (command) {
+				if (!command.authorized_channels.includes(channel.id)) {
+					_globals.log.send(`Pas si vite <@${message.author.id}>, tu ne peux faire cette commande que dans ces channels: ${command.getChannelsList()} :3`, message.channel)
+				} else if (!command.canExec(message, parsed.args)) {
+					return;
+					//_globals.log.send(`Pas possible de faire la commande ${_globals.commands.format(command.id)} pour le moment, déso !`, message.channel)
+				} else {
+					command.exec(message, parsed.args)
+				}
+			} else {
+				_globals.log.send(`${_globals.commands.format(parsed.id)} ça n'existe pas :rage:`, message.channel)
+			}
 		}
 	}
 

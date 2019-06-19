@@ -23,14 +23,13 @@ class CommandFactory {
 		return obj
 	}
 
-	findById(id) {
+	get(id) {
 		return this.commands.find((i) => (i.id == id))
 	}
 
 	format(cmd) {
 		return `\`${this.constants.command_prefix + this.config.command_name} ${cmd}\``
 	}
-
 }
 
 

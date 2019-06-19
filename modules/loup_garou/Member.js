@@ -1,19 +1,12 @@
 
 class Member {
-	constructor() {
-		this.nickname = ''
-		this.id = ''
-		this.roles = []
-		this.discord = {
-			guild_member: null,
-			id: null
-		}
-	}
-
-	init(data) {
+	constructor(data) {
 		for (var i in data) {
 			this[i] = data[i]
 		}
+	}
+
+	init() {
 	}
 
 	send(txt, timeout = 0) {
