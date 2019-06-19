@@ -33,7 +33,10 @@ class MemberFactory {
 		return res
 	}
 
-	all() {
+	all(fn = null) {
+		if (fn) {
+			this.members.forEach(fn)
+		}
 		return this.members
 	}
 }

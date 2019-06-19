@@ -6,8 +6,8 @@ class RoleFactory {
 	}
 
 	create(data) {
-		var role = new Role()
-		role.init(data)
+		var role = new Role(data)
+		role.init()
 		this.roles.push(role)
 		return role
 	}
@@ -18,14 +18,17 @@ class RoleFactory {
 	}
 
 	get(id) {
-		return this.find((i) => (this.id == id))
+		return this.find((i) => (i.id == id))
 	}
 
 	find(fn) {
 		return this.roles.find(fn)
 	}
 
-	all() {
+	all(fn = null) {
+		if (fn) {
+			this.roles.forEach(fn)
+		}
 		return this.roles
 	}
 }

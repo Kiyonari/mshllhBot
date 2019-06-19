@@ -1,4 +1,5 @@
 var Command = require("../Command.js")
+const Utils = require("../../../Utils.js")
 
 class Start extends Command {
 	canExec(message, args) {
@@ -19,12 +20,12 @@ class Start extends Command {
 
 	setRoles() {
 		var conf = []
-		for (var role of this.globals.roles.all()) {
-			var role = {id: role.id, mandatory: role.mandatory ? true : false, optional: !role.mandatory}
-			if (role.fixed_number) {
-				role.ratio = role.fixed_number
+		for (var registered of this.globals.roles.all()) {
+			var role = {id: registered.id, mandatory: registered.mandatory ? true : false, optional: !registered.mandatory}
+			if (registered.fixed_number) {
+				role.ratio = registered.fixed_number
 			} else {
-				role.ratio = Math.floor(role.ratio * this.globals.members.all().length)
+				role.ratio = Math.floor(registered.ratio * this.globals.members.all().length)
 				if (role.ratio <= 0) {
 					role.ratio = 1
 				}
@@ -45,6 +46,7 @@ class Start extends Command {
 				return 1
 			}
 		})
+
 		var shuffled = this.shuffle(this.globals.members.all())
 		var current_role_id = 0
 		var current_role = conf[current_role_id]
@@ -58,9 +60,12 @@ class Start extends Command {
 				}
 			}
 		})
-		this.globals.members.all().forEach(function(member) {
-			member.setRole(this.globals.roles.get(shuffled.find((i) => member.id == i.id).role))
-		})
+		for (var member of this.globals.members.all()) {
+			member.role = this.globals.roles.get(shuffled.find((i) => member.id == i.id).role)
+		}
+	}
+
+	startGame() {
 	}
 
 	shuffle(array) {
@@ -72,12 +77,8 @@ class Start extends Command {
         array[counter] = array[index];
         array[index] = temp;
     }
-
     return array;
 	}
-
-
-
 }
 
 module.exports = new Start({

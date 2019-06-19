@@ -12,9 +12,6 @@ class Member {
 	send(txt, timeout = 0) {
 		Log.send(txt, this.discord.guild_member, timeout)
 	}
-
-	setRole(role) {
-	}
 }
 
 module.exports = Member;

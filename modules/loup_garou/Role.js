@@ -1,14 +1,12 @@
 
 class Role {
-	constructor() {
-		this.id = ''
-		this.name = ''
-	}
-
-	init(data) {
+	constructor(data) {
 		for (var i in data) {
 			this[i] = data[i]
 		}
+	}
+
+	init() {
 	}
 }
 
