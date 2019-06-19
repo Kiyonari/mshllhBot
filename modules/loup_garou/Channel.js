@@ -21,23 +21,37 @@ class Channel {
 	}
 
 	setSendMessagesState(state) {
-		for (var member of _members.find((m) => m.hasRole('role'))) {
-			this.discord.channel.overwritePermissions(member.discord.member, {
+		var role = this.role
+		for (var member of this.globals.members.find((m) => m.role.id == role)) {
+			this.discord.channel.overwritePermissions(this.globals.discord.getGuildMember('id', member.discord.id), {
 				SEND_MESSAGES: state,
 			})
 		}
 	}
 
 	disable() {
-		setSendMessagesState(false)
+		this.setSendMessagesState(false)
 	}
 
 	enable() {
-		setSendMessagesState(true)
+		this.setSendMessagesState(true)
 	}
 
 	flush() {
 		this.discord.channel.fetchMessages().then(messages => this.discord.channel.bulkDelete(messages));
+	}
+
+	sendWelcomeMessage() {
+		this.send(this.getWelcomeMessage(), 500)
+	}
+
+	getWelcomeMessage() {
+		switch (this.role) {
+			case 'villager': return `Vous êtes ici dans le fameux village de Hénin-Beaumont, ~~fief du FN~~ heureuse bourgade paisible et prospère !\nAucune attaque de terroristes en vue, vous pouvez dormir sur vos 2 oreilles !`
+			case 'cupidon': return `Coucou bébé qui pleure ! Tu vas pouvoir choisir 2 personnes qui vont s'aimer pour toujours :3`
+			case 'werewolf': return `Coucou ! Bienvenue sur le channel réversé aux combattants de la liberté :heart:`
+			default: return "Coucou"
+		}
 	}
 }
 

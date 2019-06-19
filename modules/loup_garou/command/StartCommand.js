@@ -66,6 +66,13 @@ class Start extends Command {
 	}
 
 	startGame() {
+		this.globals.channels.all(function(channel) {
+			if (!channel.lobby) {
+				channel.flush()
+				channel.disable()
+				channel.sendWelcomeMessage()
+			}
+		})
 	}
 
 	shuffle(array) {

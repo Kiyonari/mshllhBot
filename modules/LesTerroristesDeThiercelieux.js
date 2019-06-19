@@ -29,9 +29,9 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 		if (!this.config.initialized) {
 			this.init(message)
 		}
-		var channel = _globals.channels.find((i) => i.discord.id == message.channel.id)
+		var channel = _globals.channels.findUnique((i) => (i.discord.id == message.channel.id))
 		if (!channel) {
-			_globals.log.send(`<@${message.author.id}> a fait un ${_globals.commands.format(command.id)} dans le channel \`${message.channel.name}\`, mais je ne le connais pas :'(`, message.channel)
+			_globals.log.send(`<@${message.author.id}> a fait un truc dans le channel \`${message.channel.name}\`, mais je ne le connais pas :'(`, message.channel)
 		} else {
 			var parsed = this.parseCommand(message.content)
 			var command = _globals.commands.get(parsed.id)

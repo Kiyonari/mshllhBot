@@ -25,7 +25,7 @@ class MemberFactory {
 
 	find(fn) {
 		var res = []
-		for (member of this.members) {
+		for (var member of this.members) {
 			if (fn(member)) {
 				res.push(member)
 			}

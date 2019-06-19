@@ -16,9 +16,11 @@ class ChannelFactory {
 	}
 
 	add(obj) {
-		this.commands.push(obj)
 		obj.constants = this.constants
 		obj.globals = this.globals
+		obj.game = this.game
+		obj.init()
+		this.commands.push(obj)
 		return obj
 	}
 
@@ -31,11 +33,28 @@ class ChannelFactory {
 	}
 
 	get(id) {
-		return this.find((i) => (i.id == id))
+		return this.findUnique((i) => (i.id == id))
 	}
 
 	find(fn) {
+		var res = []
+		for (var channel of this.channels) {
+			if (fn(channel)) {
+				res.push(channel)
+			}
+		}
+		return res
+	}
+
+	findUnique(fn) {
 		return this.channels.find(fn)
+	}
+
+	all(fn = null) {
+		if (fn) {
+			this.channels.forEach(fn)
+		}
+		return this.channels
 	}
 }
 
