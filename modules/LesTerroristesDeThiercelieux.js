@@ -1,229 +1,23 @@
 const BaseModule = require("./BaseModule.js")
-const Utils = require("../Utils.js")
+// const Utils = require("../Utils.js")
 
-const Discord = require("discord.js")
+// const Discord = require("discord.js")
 
-const c_play_order_start = ["cupidon"]
-const c_play_order = ["clairvoyant", "werewolf", "witch"]
+// const c_play_order_start = ["cupidon"]
+// const c_play_order = ["clairvoyant", "werewolf", "witch"]
 
-class Log {
-	static send(txt, channel, timeout = 0) {
-		if (timeout) {
-			setTimeout(() => channel.send(txt), timeout)
-		} else {
-			channel.send(txt)
-		}
-	}
+var _globals = require("./loup_garou/globals.js")
+
+var _game = {
+	status: 'stopped',
+	turn: 0
 }
-
-
-class MemberFactory {
-	constructor() {
-		this.members = []
-	}
-
-	create(data) {
-		var member = new Member()
-		member.init(data)
-		this.members.push(member)
-		return member
-	}
-
-	findUnique(fn) {
-		return this.members.find(fn)
-	}
-
-	find(fn) {
-		var res = []
-		for (member of this.members) {
-			if (fn(member)) {
-				res.push(member)
-			}
-		}
-		return res
-	}
-}
-
-class Member {
-	constructor() {
-		this.nickname = ''
-		this.id = ''
-		this.roles = []
-		this.discord = {
-			guild_member: null,
-			id: null
-		}
-	}
-
-	init(data) {
-		for (var i in data) {
-			this[i] = data[i]
-		}
-	}
-
-	send(txt, timeout = 0) {
-		Log.send(txt, this.discord.guild_member, timeout)
-	}
-
-	setRole(role) {
-	}
-}
-
-
-
-
-
-
-class ChannelFactory {
-	constructor() {
-		this.channels = []
-	}
-
-	create(data) {
-		var channel = new Channel()
-		channel.init(data)
-		this.channels.push(channel)
-		return channel
-	}
-
-	getDefaultLobby() {
-		return this.channels.find((i) => (i.id == 'lobby'))
-	}
-}
-
-class Channel {
-	constructor() {
-		this.id = ''
-		this.lobby = false
-		this.role = ''
-		this.discord = {
-			channel: null,
-			id: null
-		}
-	}
-
-	init(data) {
-		for (var i in data) {
-			this[i] = data[i]
-		}
-	}
-
-	send(txt, timeout = 0) {
-		Log.send(txt, this.discord.channel, timeout)
-	}
-
-	assign(member) {
-		this.discord.channel.overwritePermissions(member.discord.member, {
-			SEND_MESSAGES: false,
-			VIEW_CHANNEL: true,
-		})
-	}
-
-	setSendMessagesState(state) {
-		for (var member of _members.find((m) => m.hasRole('role'))) {
-			this.discord.channel.overwritePermissions(member.discord.member, {
-				SEND_MESSAGES: state,
-			})
-		}
-	}
-
-	disable() {
-		setSendMessagesState(false)
-	}
-
-	enable() {
-		setSendMessagesState(true)
-	}
-
-	flush() {
-		this.discord.channel.fetchMessages().then(messages => this.discord.channel.bulkDelete(messages));
-	}
-}
-
-
-
-
-
-class RoleFactory {
-	constructor() {
-		this.roles = []
-	}
-
-	create(data) {
-		var role = new Role()
-		role.init(data)
-		this.roles.push(role)
-		return role
-	}
-}
-
-class Role {
-	constructor() {
-		this.id = ''
-		this.name = ''
-	}
-
-	init(data) {
-		for (var i in data) {
-			this[i] = data[i]
-		}
-	}
-}
-
-
-
-
-
-class CommandFactory {
-	constructor() {
-		this.commands = []
-	}
-
-	create(data) {
-		var command = new Command()
-		command.init(data)
-		this.commands.push(command)
-		return command
-	}
-
-	findById(id) {
-		return this.commands.find((i) => (i.id == id))
-	}
-}
-
-class Command {
-	constructor() {
-		this.authorized_channels = []
-		this.required_status = ''
-	}
-
-	init(data) {
-		for (var i in data) {
-			this[i] = data[i]
-		}
-	}
-
-	canExec(args) {
-		return true
-	}
-
-	exec(args) {
-	}
-}
-
-
-
-var _members = new MemberFactory()
-var _roles = new RoleFactory()
-var _channels = new ChannelFactory()
-var _commands = new CommandFactory()
 
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
 		conf.command_name = "graou";
-		conf.admin_role = '586169000623341588';
+		conf.initialized = false
 		super(conf)
-		this.init()
 	}
 
 	canProcess(message) {
@@ -231,54 +25,77 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	process(message) {
+		console.log("processing")
+		if (!this.config.initialized) {
+			this.init(message)
+		}
 		var command = this.parseCommand(message.content)
-		var found = _commands.findById(command.id)
+		var found = _globals.commands.findById(command.id)
 		if (found) {
-			if (found.canExec(command.args)) {
+			if (found.canExec(message, command.args)) {
 				found.exec(command.args)
 			}
 		} else {
-			Log.send(`${_commands.format(command.id)} ça n'existe pas :rage:`, _channels.getDefaultLobby())
+			_globals.log.send(`${_globals.commands.format(command.id)} ça n'existe pas :rage:`, _globals.channels.getDefaultLobby())
 		}
 	}
 
-	init() {
+	init(message) {
+		_globals.discord.guild = message.guild
 		this.createRoles()
 		this.createChannels()
 		this.createCommands()
+		this.initLog()
+		this.config.initialized = true
+	}
+
+	initLog() {
+		_globals.log.config = this.config
+		_globals.log.constants = this.constants
+		_globals.log.game = _game
 	}
 
 	createRoles() {
-		_roles.create({ id: 'villager', name: "Péon", ratio: 1 })
-		_roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
-		_roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
-		_roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
-		_roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
-		_roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
+		// _globals.roles.create({ id: 'villager', name: "Péon", ratio: 1 })
+		// _globals.roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
+		// _globals.roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
+		// _globals.roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
+		// _globals.roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
+		// _globals.roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
 	}
 
 	createCommands() {
-		_commands.create({id: 'init', required_status: 'init', authorized_channels: ['lobby'] })
-		_commands.create({id: 'register', required_status: 'init', authorized_channels: ['lobby'] })
-		_commands.create({id: 'start', required_status: 'init', authorized_channels: ['lobby'] })
-		_commands.create({id: 'vote',required_status: 'start', authorized_channels: ['lobby'] })
-		_commands.create({id: 'stop', required_status: 'init', authorized_channels: ['lobby'] })
-		_commands.create({id: 'list', required_status: 'init', authorized_channels: ['lobby'] })
-		_commands.create({id: 'marry',required_status: 'start', authorized_channels: [] })
-		_commands.create({id: 'test', required_status: 'init', authorized_channels: ['lobby', 'history', 'general'] })
+		_globals.commands.config = this.config
+		_globals.commands.constants = this.constants
+		_globals.commands.game = _game
+		for (var c of _globals.data.registered_commands) {
+			_globals.commands.add(require("./loup_garou/command/" + c + "Command.js"))
+		}
+
+		// _globals.commands.create({id: 'init', required_status: 'init', authorized_channels: ['lobby'] })
+		// _globals.commands.create({id: 'register', required_status: 'init', authorized_channels: ['lobby'] })
+		// _globals.commands.create({id: 'start', required_status: 'init', authorized_channels: ['lobby'] })
+		// _globals.commands.create({id: 'vote',required_status: 'start', authorized_channels: ['lobby'] })
+		// _globals.commands.create({id: 'stop', required_status: 'init', authorized_channels: ['lobby'] })
+		// _globals.commands.create({id: 'list', required_status: 'init', authorized_channels: ['lobby'] })
+		// _globals.commands.create({id: 'marry',required_status: 'start', authorized_channels: [] })
+		// _globals.commands.create({id: 'test', required_status: 'init', authorized_channels: ['lobby', 'history', 'general'] })
 	}
 
 	createChannels() {
-		_channels.create({ id: 'lobby', discord: { id: '586174272687308830' }, lobby: true })
-		_channels.create({ id: 'history', discord: { id: '586169619564199956' }, lobby: true })
-		_channels.create({ id: 'general', discord: { id: '586168794087686145' }, lobby: true })
-		_channels.create({ id: 'villager-channel', role: 'villager', discord: { id: '586169842135072776' }, lobby: false })
-		_channels.create({ id: 'werewolf-channel', role: 'werewolf', discord: { id: '586171506673844234' }, lobby: false })
-		_channels.create({ id: 'witch-channel', role: 'witch', discord: { id: '586170490180337675' }, lobby: false })
-		_channels.create({ id: 'cupidon-channel', role: 'cupidon', discord: { id: '586176105116073994' }, lobby: false })
-		_channels.create({ id: 'clairvoyant-channel', role: 'clairvoyant', discord: { id: '586170550095708171' }, lobby: false })
-		_channels.create({ id: 'hunter-channel', role: 'hunter', discord: { id: '586170721341014056' }, lobby: false })
-		_channels.create({ id: 'dead-channel', role: 'dead', discord: { id: '586169866294394881' }, lobby: false })
+		_globals.channels.config = this.config
+		_globals.channels.constants = this.constants
+		_globals.channels.game = _game
+		_globals.channels.create({ id: 'lobby', discord: { id: '586174272687308830' }, lobby: true })
+		_globals.channels.create({ id: 'history', discord: { id: '586169619564199956' }, lobby: true })
+		_globals.channels.create({ id: 'general', discord: { id: '586168794087686145' }, lobby: true })
+		_globals.channels.create({ id: 'villager-channel', role: 'villager', discord: { id: '586169842135072776' }, lobby: false })
+		_globals.channels.create({ id: 'werewolf-channel', role: 'werewolf', discord: { id: '586171506673844234' }, lobby: false })
+		_globals.channels.create({ id: 'witch-channel', role: 'witch', discord: { id: '586170490180337675' }, lobby: false })
+		_globals.channels.create({ id: 'cupidon-channel', role: 'cupidon', discord: { id: '586176105116073994' }, lobby: false })
+		_globals.channels.create({ id: 'clairvoyant-channel', role: 'clairvoyant', discord: { id: '586170550095708171' }, lobby: false })
+		_globals.channels.create({ id: 'hunter-channel', role: 'hunter', discord: { id: '586170721341014056' }, lobby: false })
+		_globals.channels.create({ id: 'dead-channel', role: 'dead', discord: { id: '586169866294394881' }, lobby: false })
 	}
 
 	parseCommand(txt) {
