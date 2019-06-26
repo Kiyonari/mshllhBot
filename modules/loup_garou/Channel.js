@@ -3,6 +3,7 @@ class Channel {
 		for (var i in data) {
 			this[i] = data[i]
 		}
+		this.members = []
 	}
 
 	init() {
@@ -14,27 +15,44 @@ class Channel {
 	}
 
 	assign(member) {
-		this.discord.channel.overwritePermissions(member.discord.member, {
+		this.members.push(member)
+		this.discord.channel.overwritePermissions(member.discord.guild_member, {
 			SEND_MESSAGES: false,
 			VIEW_CHANNEL: true,
 		})
 	}
 
-	setSendMessagesState(state) {
+	unassign(member) {
+		this.discord.channel.overwritePermissions(member.discord.guild_member, {
+			SEND_MESSAGES: false,
+			VIEW_CHANNEL: false,
+		})
+	}
+
+	setPermissionsState(view, send) {
 		var role = this.role
 		for (var member of this.globals.members.find((m) => m.role.id == role)) {
 			this.discord.channel.overwritePermissions(this.globals.discord.getGuildMember('id', member.discord.id), {
-				SEND_MESSAGES: state,
+				SEND_MESSAGES: send,
+				VIEW_CHANNEL: view
 			})
 		}
 	}
 
 	disable() {
-		this.setSendMessagesState(false)
+		this.setPermissionsState(true, false)
 	}
 
 	enable() {
-		this.setSendMessagesState(true)
+		this.setPermissionsState(true, true)
+	}
+
+	hide() {
+		this.setPermissionsState(false, false)
+	}
+
+	show() {
+		this.setPermissionsState(true, false)
 	}
 
 	flush() {
@@ -42,7 +60,7 @@ class Channel {
 	}
 
 	sendWelcomeMessage() {
-		this.send(this.getWelcomeMessage(), 500)
+		this.send(this.getWelcomeMessage(), 800)
 	}
 
 	getWelcomeMessage() {

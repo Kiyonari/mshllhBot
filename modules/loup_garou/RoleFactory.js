@@ -13,7 +13,11 @@ class RoleFactory {
 	}
 
 	add(obj) {
-		this.commands.push(obj)
+		obj.constants = this.constants
+		obj.globals = this.globals
+		obj.game = this.game
+		obj.init()
+		this.roles.push(obj)
 		return obj
 	}
 
@@ -31,7 +35,11 @@ class RoleFactory {
 		}
 		return this.roles
 	}
-}
 
+	reset() {
+		this.roles = []
+	}
+
+}
 
 module.exports = new RoleFactory()

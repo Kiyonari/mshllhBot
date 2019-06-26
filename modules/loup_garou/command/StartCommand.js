@@ -13,7 +13,6 @@ class Start extends Command {
 	exec(message, args) {
 		this.globals.log.send(`C'est tipar !`)
 		this.game.status = 'start'
-
 		this.setRoles()
 		this.startGame()
 	}
@@ -60,19 +59,36 @@ class Start extends Command {
 				}
 			}
 		})
+		for (var a in shuffled) {
+			console.log(a.nickname + " => " + a.role)
+		}
+
 		for (var member of this.globals.members.all()) {
-			member.role = this.globals.roles.get(shuffled.find((i) => member.id == i.id).role)
+			if (member.nickname == "Asmoddym") {
+				member.role = this.globals.roles.get('cupidon')
+			} else {
+				member.role = this.globals.roles.get(shuffled.find((i) => member.discord.id == i.discord.id).role)
+			}
 		}
 	}
 
 	startGame() {
+		this.globals.members.all(function(m) {
+			m.removeAdminRole()
+			console.log(m.nickname + " -> " + m.role.id)
+		})
 		this.globals.channels.all(function(channel) {
 			if (!channel.lobby) {
+				var members = channel.globals.members.find((m) => (m.role.id == channel.role))
+				for (var member of members) {
+					channel.assign(member)
+				}
 				channel.flush()
-				channel.disable()
+				//channel.disable()
 				channel.sendWelcomeMessage()
 			}
 		})
+		this.game.nextTurn()
 	}
 
 	shuffle(array) {

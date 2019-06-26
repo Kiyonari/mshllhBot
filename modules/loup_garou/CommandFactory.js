@@ -30,6 +30,11 @@ class CommandFactory {
 	format(cmd) {
 		return `\`${this.constants.command_prefix + this.config.command_name} ${cmd}\``
 	}
+
+	reset() {
+		this.commands = []
+	}
+
 }
 
 

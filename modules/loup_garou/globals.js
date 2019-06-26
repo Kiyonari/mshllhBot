@@ -9,10 +9,9 @@ var data = {
 	},
 
 	data: {
-		registered_commands: ["Init", "Register", "Start"],
-		registered_roles: ["Werewolf", "Villager"],
+		registered_commands: ["Init", "Register", "Start", "Stop", "Marry"],
+		registered_roles: ["Werewolf", "Cupidon", "Villager"],
 	}
-
 }
 
 data.members.globals = data

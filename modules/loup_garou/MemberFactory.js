@@ -39,6 +39,13 @@ class MemberFactory {
 		}
 		return this.members
 	}
+
+	reset() {
+		this.all(function(m) {
+			m.globals.channels.get(m.role.id + '-channel').unassign(m)
+		})
+		this.members = []
+	}
 }
 
 module.exports = new MemberFactory()

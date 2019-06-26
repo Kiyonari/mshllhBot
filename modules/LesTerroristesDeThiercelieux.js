@@ -1,22 +1,42 @@
 const BaseModule = require("./BaseModule.js")
-// const Utils = require("../Utils.js")
-
-// const Discord = require("discord.js")
-
-// const c_play_order_start = ["cupidon"]
-// const c_play_order = ["clairvoyant", "werewolf", "witch"]
 
 var _globals = require("./loup_garou/globals.js")
 
 var _game = {
 	status: 'stop',
-	turn: 0
+	turn: {
+		id: 0,
+		waiting_command: null,
+	},
+	current_role: -1,
+	initialized: false,
+	order: {
+		start: ['cupidon'],
+		default: ['clairvoyant', 'werewolf', 'witch']
+	}
+}
+
+_game.nextTurn = function() {
+	var order = _game.order[_game.turn.id == 0 ? 'start' : 'default']
+	if (_game.current_role + 1 == order.length) {
+		_game.current_role = -1
+		_game.turn.id++
+	}
+	var playing_role = order[_game.current_role + 1]
+	_game.current_role++
+	_globals.roles.all(function(r) {
+		if (r.id == playing_role) {
+			r['play' + ((_game.turn.id == 0) ? 'Start' : 'Default') + 'Turn']()
+			r.discord.channel.enable()
+		} else {
+			r.discord.channel.disable()
+		}
+	})
 }
 
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
 		conf.command_name = "graou";
-		conf.initialized = false
 		super(conf)
 	}
 
@@ -25,8 +45,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	process(message) {
-		console.log("processing")
-		if (!this.config.initialized) {
+		if (!_game.initialized) {
 			this.init(message)
 		}
 		var channel = _globals.channels.findUnique((i) => (i.discord.id == message.channel.id))
@@ -36,13 +55,16 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 			var parsed = this.parseCommand(message.content)
 			var command = _globals.commands.get(parsed.id)
 			if (command) {
-				if (!command.authorized_channels.includes(channel.id)) {
-					_globals.log.send(`Pas si vite <@${message.author.id}>, tu ne peux faire cette commande que dans ces channels: ${command.getChannelsList()} :3`, message.channel)
-				} else if (!command.canExec(message, parsed.args)) {
-					return;
-					//_globals.log.send(`Pas possible de faire la commande ${_globals.commands.format(command.id)} pour le moment, déso !`, message.channel)
+				if (!_game.turn.waiting_command || (_game.turn.waiting_command && _game.turn.waiting_command == command.id)) {
+					if (!command.authorized_channels.includes(channel.id)) {
+						_globals.log.send(`Pas si vite <@${message.author.id}>, tu ne peux faire cette commande que dans ces channels: ${command.getChannelsList()} :3`, message.channel)
+					} else if (!command.canExec(message, parsed.args)) {
+						return;
+					} else {
+						command.exec(message, parsed.args)
+					}
 				} else {
-					command.exec(message, parsed.args)
+					_globals.log.send(`Pas possible de faire la commande ${_globals.commands.format(command.id)} pour le moment, déso !`, message.channel)
 				}
 			} else {
 				_globals.log.send(`${_globals.commands.format(parsed.id)} ça n'existe pas :rage:`, message.channel)
@@ -52,11 +74,11 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 
 	init(message) {
 		_globals.discord.guild = message.guild
-		this.createRoles()
 		this.createChannels()
 		this.createCommands()
+		this.createRoles()
 		this.initLog()
-		this.config.initialized = true
+		_game.initialized = true
 	}
 
 	initLog() {
@@ -66,12 +88,18 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	createRoles() {
-		_globals.roles.create({ id: 'villager', name: "Péon", ratio: 1 })
-		_globals.roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
-		_globals.roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
-		_globals.roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
-		_globals.roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
-		_globals.roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
+		_globals.roles.config = this.config
+		_globals.roles.constants = this.constants
+		_globals.roles.game = _game
+		for (var c of _globals.data.registered_roles) {
+			_globals.roles.add(require("./loup_garou/role/" + c + "Role.js"))
+		}
+		// _globals.roles.create({ id: 'villager', name: "Péon", ratio: 1 })
+		// _globals.roles.create({ id: 'werewolf', name: "Terroriste", ratio: 0.4, mandatory: true })
+		// _globals.roles.create({ id: 'hunter', name: "Cancer", fixed_number: 1, ratio: 0.1 })
+		// _globals.roles.create({ id: 'clairvoyant', name: "Témoin de Jéhovah", fixed_number: 1, ratio: 0.1 })
+		// _globals.roles.create({ id: 'cupidon', name: "Bébé avec un arc qui vole", ratio: 0.1, fixed_number: 1 })
+		// _globals.roles.create({ id: 'witch', name: "Chimiothérapeute", fixed_number: 1, ratio: 0.1 })
 	}
 
 	createCommands() {

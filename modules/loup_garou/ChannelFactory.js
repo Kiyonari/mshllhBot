@@ -20,7 +20,7 @@ class ChannelFactory {
 		obj.globals = this.globals
 		obj.game = this.game
 		obj.init()
-		this.commands.push(obj)
+		this.channels.push(obj)
 		return obj
 	}
 
@@ -55,6 +55,10 @@ class ChannelFactory {
 			this.channels.forEach(fn)
 		}
 		return this.channels
+	}
+
+	reset() {
+		this.channels = []
 	}
 }
 

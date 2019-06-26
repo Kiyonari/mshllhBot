@@ -19,7 +19,7 @@ class RegisterCommand extends Command {
 		var member = message.author
 		var guild_member = this.globals.discord.getGuildMember('id', message.author.id)
 		var nickname = guild_member.nickname ? guild_member.nickname : member.username
-		this.globals.members.create({nickname: nickname, discord: {id: member.id }})
+		this.globals.members.create({nickname: nickname, status: 'alive', discord: {id: member.id }})
 		this.globals.log.send(`**${nickname}** a rejoint la partie, ${["on s'enjaille", "on s'amuse", "vous pouvez quitter du coup"][Utils.rand(2)]}`)
 	}
 }
