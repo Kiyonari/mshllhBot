@@ -2,7 +2,7 @@ var Role = require("../Role.js")
 
 class CupidonRole extends Role {
 	playStartTurn() {
-		this.game.turn.waiting_command = "marry"
+		this.game.waiting_command = "marry"
 	}
 
 	playDefaultTurn() {

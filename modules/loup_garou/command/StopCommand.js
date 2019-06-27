@@ -19,8 +19,8 @@ class StopCommand extends Command {
 	}
 
 	reset() {
-		this.globals.members.reset()
 		this.globals.channels.reset()
+		this.globals.members.reset()
 		this.globals.roles.reset()
 		this.globals.members.reset()
 		this.game.initialized = false

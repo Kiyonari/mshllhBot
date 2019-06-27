@@ -20,6 +20,7 @@ class Start extends Command {
 	setRoles() {
 		var conf = []
 		for (var registered of this.globals.roles.all()) {
+			registered.attributed = false
 			var role = {id: registered.id, mandatory: registered.mandatory ? true : false, optional: !registered.mandatory}
 			if (registered.fixed_number) {
 				role.ratio = registered.fixed_number
@@ -59,16 +60,16 @@ class Start extends Command {
 				}
 			}
 		})
-		for (var a in shuffled) {
-			console.log(a.nickname + " => " + a.role)
-		}
-
 		for (var member of this.globals.members.all()) {
 			if (member.nickname == "Asmoddym") {
+				member.discord.guild_member.removeRole(member.globals.discord.admin_role)
+				member.role = this.globals.roles.get('werewolf')
+			} else if (member.nickname == "MashallahProxy") {
 				member.role = this.globals.roles.get('cupidon')
 			} else {
 				member.role = this.globals.roles.get(shuffled.find((i) => member.discord.id == i.discord.id).role)
 			}
+			member.role.attributed = true
 		}
 	}
 

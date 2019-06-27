@@ -5,10 +5,16 @@ var _globals = require("./loup_garou/globals.js")
 var _game = {
 	status: 'stop',
 	turn: {
+		role: -1,
 		id: 0,
-		waiting_command: null,
+		werewolf_data: {
+			dead: null
+		},
+		clairvoyant_data: {
+			found: null
+		},
 	},
-	current_role: -1,
+	waiting_command: null,
 	initialized: false,
 	order: {
 		start: ['cupidon'],
@@ -17,21 +23,43 @@ var _game = {
 }
 
 _game.nextTurn = function() {
+	console.log("nextTurn: " + _game.turn.id + " (" + _game.turn.role + ")")
 	var order = _game.order[_game.turn.id == 0 ? 'start' : 'default']
-	if (_game.current_role + 1 == order.length) {
-		_game.current_role = -1
+	console.log("order: " + (_game.turn.id == 0 ? 'start' : 'default'))
+	if (_game.turn.role + 1 >= order.length) {
+		console.log("arrived at the end")
+		_game.turn.role = -1
 		_game.turn.id++
-	}
-	var playing_role = order[_game.current_role + 1]
-	_game.current_role++
-	_globals.roles.all(function(r) {
-		if (r.id == playing_role) {
-			r['play' + ((_game.turn.id == 0) ? 'Start' : 'Default') + 'Turn']()
-			r.discord.channel.enable()
+		if (_game.turn.id != 1) {
+			_game.newTurn()
+			return;
 		} else {
+			order = _game.order['default']
+		}
+	}
+	var playing_role = order[_game.turn.role + 1]
+	var played = false
+	console.log("playing role " + playing_role)
+	_game.turn.role++
+	_globals.roles.all(function(r) {
+		if (r.id == playing_role && r.attributed) {
+			console.log("calling method of Role " + r.id)
+			r['play' + ((_game.turn.id == 0) ? 'Start' : 'Default') + 'Turn']()
+			played = true
+		} else {
+			console.log("disabling channel " + r.discord.channel.id)
 			r.discord.channel.disable()
 		}
 	})
+	if (!played) {
+		setTimeout(() => (_game.nextTurn()), 500)
+	}
+	console.log("turn id at the end: " + _game.turn.id)
+}
+
+_game.newTurn = function() {
+	_game.waiting_command = 'vote'
+	_globals.channels.get('lobby').send(`Le jour se lève sur Hénin-Beaumont, et les terroristes ont encore frappé... Et cette fois-ci, c'est ${_globals.members.get(_game.turn.werewolf_data.dead).nickname} qui s'est fait exploser la tronche dans la rue :'(`)
 }
 
 class LesTerroristesDeThiercelieux extends BaseModule {
@@ -55,7 +83,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 			var parsed = this.parseCommand(message.content)
 			var command = _globals.commands.get(parsed.id)
 			if (command) {
-				if (!_game.turn.waiting_command || (_game.turn.waiting_command && _game.turn.waiting_command == command.id)) {
+				if (!_game.waiting_command || (_game.waiting_command && _game.waiting_command == command.id)) {
 					if (!command.authorized_channels.includes(channel.id)) {
 						_globals.log.send(`Pas si vite <@${message.author.id}>, tu ne peux faire cette commande que dans ces channels: ${command.getChannelsList()} :3`, message.channel)
 					} else if (!command.canExec(message, parsed.args)) {

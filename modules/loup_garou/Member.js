@@ -15,7 +15,7 @@ class Member {
 	}
 
 	removeAdminRole() {
-		this.discord.guild_member.removeRole(this.globals.discord.admin_role)
+		//this.discord.guild_member.removeRole(this.globals.discord.admin_role)
 	}
 
 	addAdminRole() {

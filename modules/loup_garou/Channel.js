@@ -11,7 +11,12 @@ class Channel {
 	}
 
 	send(txt, timeout = 0) {
-		this.discord.channel.send(txt, this.discord.channel, timeout)
+		var _this = this
+		if (timeout > 0) {
+			setTimeout(() => (_this.discord.channel.send(txt)), timeout)
+		} else {
+			this.discord.channel.send(txt)
+		}
 	}
 
 	assign(member) {
@@ -23,6 +28,7 @@ class Channel {
 	}
 
 	unassign(member) {
+		this.members.splice(this.members.findIndex((i) => (i.discord.id == member.discord.id)), 1)
 		this.discord.channel.overwritePermissions(member.discord.guild_member, {
 			SEND_MESSAGES: false,
 			VIEW_CHANNEL: false,
@@ -30,8 +36,8 @@ class Channel {
 	}
 
 	setPermissionsState(view, send) {
-		var role = this.role
-		for (var member of this.globals.members.find((m) => m.role.id == role)) {
+		for (var member of this.members) {
+			console.log("setting permissions (" + view + ", " + send + ") for " + member.nickname + " in channel " + this.id)
 			this.discord.channel.overwritePermissions(this.globals.discord.getGuildMember('id', member.discord.id), {
 				SEND_MESSAGES: send,
 				VIEW_CHANNEL: view

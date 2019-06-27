@@ -58,6 +58,9 @@ class ChannelFactory {
 	}
 
 	reset() {
+		for (var channel of this.channels) {
+			channel.hide()
+		}
 		this.channels = []
 	}
 }
