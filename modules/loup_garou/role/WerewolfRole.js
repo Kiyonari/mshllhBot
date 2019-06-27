@@ -8,7 +8,17 @@ class WerewolfRole extends Role {
 
 	playDefaultTurn() {
 		this.globals.channels.get('lobby').send("werewolf default turn")
+		this.discord.channel.send(`${this.getPlayersMentionList()}allez hop hop hop on relève le nez de son tapis et on choisit son prochain martyr !`)
+		setTimeout(() => this.discord.channel.enable(), 500)
 		this.game.waiting_command = 'kill'
+	}
+
+	getPlayersMentionList() {
+		var txt = ''
+		for (var m of this.globals.members.findByRole('werewolf')) {
+			txt += `<@${m.discord.id}> `
+		}
+		return txt
 	}
 }
 

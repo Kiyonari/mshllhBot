@@ -27,21 +27,23 @@ class Channel {
 		})
 	}
 
-	unassign(member) {
-		this.members.splice(this.members.findIndex((i) => (i.discord.id == member.discord.id)), 1)
+	unassign(member, view = false) {
+		this.removeMember(member)
 		this.discord.channel.overwritePermissions(member.discord.guild_member, {
 			SEND_MESSAGES: false,
-			VIEW_CHANNEL: false,
+			VIEW_CHANNEL: view,
 		})
 	}
 
 	setPermissionsState(view, send) {
 		for (var member of this.members) {
-			console.log("setting permissions (" + view + ", " + send + ") for " + member.nickname + " in channel " + this.id)
-			this.discord.channel.overwritePermissions(this.globals.discord.getGuildMember('id', member.discord.id), {
-				SEND_MESSAGES: send,
-				VIEW_CHANNEL: view
-			})
+			if (!member.dead) {
+				console.log("setting permissions (" + view + ", " + send + ") for " + member.nickname + " in channel " + this.id)
+				this.discord.channel.overwritePermissions(this.globals.discord.getGuildMember('id', member.discord.id), {
+					SEND_MESSAGES: send,
+					VIEW_CHANNEL: view
+				})
+			}
 		}
 	}
 
@@ -62,11 +64,14 @@ class Channel {
 	}
 
 	flush() {
-		this.discord.channel.fetchMessages().then(messages => this.discord.channel.bulkDelete(messages));
+		if (!this.flushed) {
+			this.flushed = true
+			this.discord.channel.fetchMessages().then(messages => this.discord.channel.bulkDelete(messages));
+		}
 	}
 
 	sendWelcomeMessage() {
-		this.send(this.getWelcomeMessage(), 800)
+		this.send(this.getWelcomeMessage(), 200)
 	}
 
 	getWelcomeMessage() {
@@ -75,6 +80,12 @@ class Channel {
 			case 'cupidon': return `Coucou bébé qui pleure ! Tu vas pouvoir choisir 2 personnes qui vont s'aimer pour toujours :3`
 			case 'werewolf': return `Coucou ! Bienvenue sur le channel réversé aux combattants de la liberté :heart:`
 			default: return "Coucou"
+		}
+	}
+
+	removeMember(member) {
+		if (this.members.find((m) => (m.id == member.id))) {
+			this.members.splice(this.members.findIndex((i) => (i.discord.id == member.discord.id)), 1)
 		}
 	}
 }

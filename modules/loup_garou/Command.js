@@ -14,7 +14,7 @@ class Command {
 	}
 
 	exec(message, args) {
-		this.globals.log.send("Commande pas encore implémentée")
+		this.globals.log.send(`${this.globals.commands.format(this.id)}: Commande pas encore implémentée`)
 	}
 
 	getChannelsList() {

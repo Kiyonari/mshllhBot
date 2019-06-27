@@ -10,7 +10,7 @@ class StopCommand extends Command {
 	}
 
 	exec(message, args) {
-		if (this.game.status == 'start') {
+		if (this.game.status != "init") {
 			this.globals.members.all((m) => (m.addAdminRole()))
 		}
 		this.globals.log.send("Stoppé ! De toute façon vous êtes tous nuls donc bon")
@@ -24,10 +24,12 @@ class StopCommand extends Command {
 		this.globals.roles.reset()
 		this.globals.members.reset()
 		this.game.initialized = false
+		this.game.waiting_command = null
 	}
 }
 
 module.exports = new StopCommand({
 	id: 'stop',
-	authorized_channels: ['lobby']
+	authorized_channels: ['lobby'],
+	overwrites_waiting_command: true
 })

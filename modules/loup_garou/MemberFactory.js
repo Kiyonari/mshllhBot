@@ -43,6 +43,15 @@ class MemberFactory {
 	reset() {
 		this.members = []
 	}
+
+	findByRole(role) {
+		return this.find((m) => (m.role.id == role))
+	}
+
+	remove(member) {
+		this.globals.channels.all(function(c) { if (!c.lobby) { c.removeMember(member) } })
+		this.members.splice(this.members.findIndex((i) => (i.id == member.id)), 1)
+	}
 }
 
 module.exports = new MemberFactory()

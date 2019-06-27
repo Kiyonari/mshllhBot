@@ -6,10 +6,11 @@ var data = {
 	commands: require("./CommandFactory.js"),
 	discord: {
 		admin_role: '586169000623341588',
+		dead_role: '586172456864317441',
 	},
 
 	data: {
-		registered_commands: ["Init", "Register", "Start", "Stop", "Marry"],
+		registered_commands: ["Test", "Init", "Register", "Start", "Stop", "Marry", "Kill"],
 		registered_roles: ["Werewolf", "Cupidon", "Villager", "Clairvoyant", "Witch"],
 	}
 }

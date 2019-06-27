@@ -8,6 +8,7 @@ class Member {
 
 	init() {
 		this.discord.guild_member = this.globals.discord.getGuildMember('id', this.discord.id)
+		this.dead = false
 	}
 
 	send(txt, timeout = 0) {
@@ -20,6 +21,24 @@ class Member {
 
 	addAdminRole() {
 		this.discord.guild_member.addRole(this.globals.discord.admin_role)
+	}
+
+	kill() {
+		console.log("killing " + this.nickname)
+		var _this = this
+		this.globals.channels.all(function(c) {
+			if (!c.lobby) {
+				if (c.id == 'dead-channel') {
+					c.assign(_this)
+					c.enable()
+				} else {
+					c.unassign(_this, true)
+				}
+			}
+		})
+		this.discord.guild_member.addRole(this.globals.discord.dead_role)
+		this.dead = true
+		this.globals.members.remove(_this)
 	}
 }
 

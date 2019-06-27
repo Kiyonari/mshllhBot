@@ -3,18 +3,17 @@ const Utils = require("../../../Utils.js")
 
 class MarryCommand extends Command {
 	canExec(message, args) {
-		if (this.game.waiting_command == 'marry') {
-			if (args.length != 2) {
-				message.channel.send(`2 personnes, ni plus ni moins !`)
-				return false
-			}
-			if (args[0] == args[1]) {
-				message.channel.send(`Pas les 2 mêmes :rage:`)
-				return false
-			}
-			return true
-		} else {
+		if (this.game.waiting_command != 'marry') {
 			this.globals.log.send(`<@${message.author.id}> tu croyais m'avoir, on ne marie pas 2 personnes comme ça en 2019 :rage:`)
+			return false
+		} else if (args.length != 2) {
+			message.channel.send(`2 personnes, ni plus ni moins !`)
+			return false
+		} else if (args[0] == args[1]) {
+			message.channel.send(`Pas les 2 mêmes :rage:`)
+			return false
+		} else if (this.globals.members.get(message.author.id).role.id != 'cupidon') {
+			message.channel.send(`Il faut être un bébé qui vole avec un arc pour faire ça <@${message.author.id}> :rage:`)
 			return false
 		}
 	}

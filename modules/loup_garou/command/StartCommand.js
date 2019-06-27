@@ -61,14 +61,14 @@ class Start extends Command {
 			}
 		})
 		for (var member of this.globals.members.all()) {
-			if (member.nickname == "Asmoddym") {
-				member.discord.guild_member.removeRole(member.globals.discord.admin_role)
+			// if (member.nickname == "Asmoddym") {
+			// 	member.discord.guild_member.removeRole(member.globals.discord.admin_role)
 				member.role = this.globals.roles.get('werewolf')
-			} else if (member.nickname == "MashallahProxy") {
-				member.role = this.globals.roles.get('cupidon')
-			} else {
-				member.role = this.globals.roles.get(shuffled.find((i) => member.discord.id == i.discord.id).role)
-			}
+			// } else if (member.nickname == "MashallahProxy") {
+			// 	member.role = this.globals.roles.get('cupidon')
+			// } else {
+			// 	member.role = this.globals.roles.get(shuffled.find((i) => member.discord.id == i.discord.id).role)
+			// }
 			member.role.attributed = true
 		}
 	}
@@ -78,18 +78,30 @@ class Start extends Command {
 			m.removeAdminRole()
 			console.log(m.nickname + " -> " + m.role.id)
 		})
-		this.globals.channels.all(function(channel) {
-			if (!channel.lobby) {
-				var members = channel.globals.members.find((m) => (m.role.id == channel.role))
-				for (var member of members) {
-					channel.assign(member)
+		console.log("starting")
+		this.globals.members.all(function(m) {
+			console.log("setting for " + m.nickname)
+			m.globals.channels.all(function(c) {
+				if (!c.lobby) {
+					if (c.id == m.role.id + "-channel") {
+						console.log("assign to " + c.id)
+						c.assign(m)
+					} else {
+						console.log("unassign to " + c.id)
+						c.unassign(m)
+					}
+					console.log("flush " + c.id)
+					c.flush()
+					console.log("welcome " + c.id)
+					c.sendWelcomeMessage()
 				}
-				channel.flush()
-				//channel.disable()
-				channel.sendWelcomeMessage()
-			}
+			})
 		})
-		this.game.nextTurn()
+		var _this = this
+		setTimeout(function() {
+			_this.game.status = 'turn'
+			_this.game.nextTurn()
+		}, 2000)
 	}
 
 	shuffle(array) {
