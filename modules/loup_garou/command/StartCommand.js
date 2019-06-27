@@ -83,7 +83,7 @@ class Start extends Command {
 			console.log("setting for " + m.nickname)
 			m.globals.channels.all(function(c) {
 				if (!c.lobby) {
-					if (c.id == m.role.id + "-channel") {
+					if (c.id == m.role.id + "-channel" || c.id == 'villager-channel') {
 						console.log("assign to " + c.id)
 						c.assign(m)
 					} else {
