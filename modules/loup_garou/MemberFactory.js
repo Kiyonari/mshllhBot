@@ -3,6 +3,7 @@ var Member = require("./Member.js");
 class MemberFactory {
 	constructor() {
 		this.members = []
+		this.registered_members = []
 	}
 
 	create(data) {
@@ -11,6 +12,7 @@ class MemberFactory {
 		member.globals = this.globals
 		member.game = this.game
 		member.init()
+		this.registered_members.push(data.discord.id)
 		this.members.push(member)
 		return member
 	}
@@ -42,6 +44,7 @@ class MemberFactory {
 
 	reset() {
 		this.members = []
+		this.registered_members = []
 	}
 
 	findByRole(role) {

@@ -3,6 +3,7 @@ var Role = require("../Role.js")
 class CupidonRole extends Role {
 	playStartTurn() {
 		this.game.waiting_command = "marry"
+		this.discord.channel.enable()
 	}
 
 	playDefaultTurn() {

@@ -10,9 +10,12 @@ class StopCommand extends Command {
 	}
 
 	exec(message, args) {
-		if (this.game.status != "init") {
-			this.globals.members.all((m) => (m.addAdminRole()))
-		}
+		// if (this.game.status != "init") {
+		// 	for (var id of this.globals.members.registered_members) {
+		// 		this.globals.discord.getGuildMember(id).removeRole(this.globals.discord.dead_role)
+		// 		this.globals.discord.getGuildMember(id).addRole(this.globals.discord.admin_role)
+		// 	}
+		// }
 		this.globals.log.send("Stoppé ! De toute façon vous êtes tous nuls donc bon")
 		this.reset()
 		this.game.status = 'stop'

@@ -23,25 +23,33 @@ class KillCommand extends Command {
 
 		if (!this.votes) {
 			this.votes = {}
+			this.votes_number = 0
 			for (var member of this.globals.members.findByRole('werewolf')) {
 				this.votes[member.id] = null
 			}
 		}
 		if (!killed) {
 			channel.send(`**${args[0]}** n'existe pas :rage:`)
-			return
-		}
-		this.votes[werewolf.id] = killed.id
-		if (this.hasRemainingVotes()) {
-			channel.send(`${this.getObjectLength(this.getVotes())} terroristes ont voté ! Voici ceux qui doivent encore voter: **${this.getRemainingVotes(true, true).join(', ')}**\n\nVoici donc les résultats pour l'instant:\n${this.getVoteResults()}`)
+		} else if (killed.id == message.author.id) {
+			channel.send(`<@${killed.id}> t'as pas pigé les règles toi... Si tu veux te suicider, attends le jour, la on joue sérieux :rage:`)
+		// } else if (werewolf.married && werewolf.married.id == killed.id) {
+		// 	werewolf.send(`Frr t'es ouf, tu peux pas tuer ton amoureux/se quand même !`)
 		} else {
-			var final_killed = this.getMostVotedMember()
-			channel.send(`Tout le monde a voté !\n\nEh bien c'est **${final_killed.nickname}** qui a été désigné pour sauter ~~pour la gloire d'Allah~~ pour la justice !`)
-			this.game.turn.werewolf_data.dead = final_killed
-			this.game.waiting_command = null
-			this.votes = null
-			channel.disable()
-			this.game.nextTurn()
+			if (!this.votes[werewolf.id]) {
+				this.votes_number++
+			}
+			this.votes[werewolf.id] = killed.id
+			if (this.hasRemainingVotes()) {
+				channel.send(`${this.votes_number} terroriste${this.votes_number > 1 ? 's ont ' : ' a '}voté ! Voici ceux qui doivent encore voter: **${this.getRemainingVotes().join(', ')}**\n\nVoici donc les résultats pour l'instant:\n${this.getVoteResults()}`)
+			} else {
+				var final_killed = this.getMostVotedMember()
+				channel.send(`Tout le monde a voté !\n\nEh bien c'est **${final_killed.nickname}** qui a été désigné pour sauter ~~pour la gloire d'Allah~~ pour la justice !`)
+				this.game.turn.werewolf_data.dead = final_killed
+				this.game.waiting_command = null
+				this.votes = null
+				channel.disable()
+				this.game.nextTurn()
+			}
 		}
 	}
 
@@ -74,11 +82,11 @@ class KillCommand extends Command {
 		return votes
 	}
 
-	getRemainingVotes(use_nickname = false, mention = false) {
+	getRemainingVotes() {
 		var votes = []
 		for (var id in this.votes) {
 			if (!this.votes[id]) {
-				votes.push(mention ? `<@${id}>` : (use_nickname ? this.globals.members.get(id).nickname : id))
+				votes.push(`<@${id}>`)
 			}
 		}
 		return votes
@@ -88,7 +96,8 @@ class KillCommand extends Command {
 		var results = this.getVotes()
 		var txt = ""
 		for (var id in results) {
-			txt += `**${this.globals.members.get(id).nickname}**: ${this.getVotesNumberById(results[id])} votes\n`
+			var n = this.getVotesNumberById(results[id])
+			txt += `**${this.globals.members.get(id).nickname}**: ${n} vote${n > 1 ? 's' : ''}\n`
 		}
 		return txt
 	}
@@ -104,7 +113,7 @@ class KillCommand extends Command {
 	}
 
 	hasRemainingVotes() {
-		return this.getObjectLength(this.getRemainingVotes()) != 0
+		return this.votes_number != this.globals.members.findByRole('werewolf').length
 	}
 
 	getObjectLength(obj) {

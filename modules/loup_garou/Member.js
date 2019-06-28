@@ -12,15 +12,19 @@ class Member {
 	}
 
 	send(txt, timeout = 0) {
-		Log.send(txt, this.discord.guild_member, timeout)
+		this.globals.log.send(txt, this.discord.guild_member, timeout)
 	}
 
-	removeAdminRole() {
-		//this.discord.guild_member.removeRole(this.globals.discord.admin_role)
+	removeRole(role) {
+		this.discord.guild_member.removeRole(this.getRole(role))
 	}
 
-	addAdminRole() {
-		this.discord.guild_member.addRole(this.globals.discord.admin_role)
+	addRole(role) {
+		this.discord.guild_member.addRole(this.getRole(role))
+	}
+
+	getRole(role) {
+		return this.globals.discord[role + "_role"]
 	}
 
 	kill() {
@@ -36,9 +40,13 @@ class Member {
 				}
 			}
 		})
-		this.discord.guild_member.addRole(this.globals.discord.dead_role)
+//		this.discord.guild_member.addRole(this.globals.discord.dead_role)
 		this.dead = true
 		this.globals.members.remove(_this)
+	}
+
+	marryTo(member) {
+		this.married = member
 	}
 }
 

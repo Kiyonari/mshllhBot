@@ -23,11 +23,11 @@ var _game = {
 }
 
 _game.nextTurn = function(stacked = false) {
-	//console.log("nextTurn: " + _game.turn.id + " (" + _game.turn.role + ")")
+	console.log("nextTurn: " + _game.turn.id + " (" + _game.turn.role + ")")
 	var order = _game.order[_game.turn.id == 0 ? 'start' : 'default']
-	//console.log("order: " + (_game.turn.id == 0 ? 'start' : 'default'))
+	console.log("order: " + (_game.turn.id == 0 ? 'start' : 'default'))
 	if (_game.turn.role + 1 >= order.length) {
-		//console.log("arrived at the end")
+		console.log("arrived at the end")
 		_game.turn.role = -1
 		_game.turn.id++
 		if (_game.turn.id != 1) {
@@ -39,15 +39,15 @@ _game.nextTurn = function(stacked = false) {
 	}
 	var playing_role = order[_game.turn.role + 1]
 	var played = false
-	//console.log("playing role " + playing_role)
+	console.log("playing role " + playing_role)
 	_game.turn.role++
 	_globals.roles.all(function(r) {
 		if (r.id == playing_role && r.attributed) {
-			//console.log("calling method of Role " + r.id)
+			console.log("calling method of Role " + r.id)
 			r['play' + ((_game.turn.id == 0) ? 'Start' : 'Default') + 'Turn']()
 			played = true
 		} else {
-			//console.log("disabling channel " + r.discord.channel.id)
+			console.log("disabling channel " + r.discord.channel.id)
 			if (!stacked) {
 				r.discord.channel.disable()
 			}
@@ -56,14 +56,20 @@ _game.nextTurn = function(stacked = false) {
 	if (!played) {
 		_game.nextTurn(true)
 	}
-	//console.log("turn id at the end: " + _game.turn.id)
+	console.log("turn id at the end: " + _game.turn.id)
 }
 
 _game.newTurn = function() {
 	var villager_channel = _globals.channels.get('villager-channel')
 	_game.waiting_command = 'vote'
 	villager_channel.send(`Le jour se lève sur Hénin-Beaumont, et les terroristes ont encore frappé... Et cette fois-ci, c'est <@${_game.turn.werewolf_data.dead.id}> qui s'est fait exploser la tronche dans la rue :cry:`)
-	_game.turn.werewolf_data.dead.kill()
+
+	if (_game.turn.werewolf_data.dead.married) {
+		villager_channel.send(`Or il s'avère que <@${_game.turn.werewolf_data.dead.id}> était marié à <@${_game.turn.werewolf_data.dead.married.id}>... Quel dommaaaaaaage... :cry:`)
+		_game.turn.werewolf_data.dead.married.kill()
+		_game.turn.werewolf_data.dead.kill()
+	}
+	villager_channel.send(`Il reste donc ${_globals.members.all().length} personnes au village... Mais vous inquiétez pas, tout va très bien ! Allez, au dodo !`)
 	_game.nextTurn()
 }
 

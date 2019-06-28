@@ -16,6 +16,7 @@ class MarryCommand extends Command {
 			message.channel.send(`Il faut être un bébé qui vole avec un arc pour faire ça <@${message.author.id}> :rage:`)
 			return false
 		}
+		return true
 	}
 
 	exec(message, args) {
@@ -27,11 +28,15 @@ class MarryCommand extends Command {
 		}
 		var channel = this.globals.channels.get('cupidon-channel')
 		channel.unassign(this.globals.members.get(message.author.id))
+		channel.flushed = false
+		channel.flush()
 		setTimeout(function() {
 			channel.assign(m1)
 			channel.assign(m2)
 			channel.enable()
-			channel.send("Coucou ! Vous êtes tous les 2 mariés, c'est formidable :3\nVous avez 10 secondes pour vous faire des papouilles, après on lance la partie !", 500)
+			m1.marryTo(m2)
+			m2.marryTo(m1)
+			channel.send(`<@${m1.id}> et <@${m2.id}> sont les deux mariés, c'est formidable :3\nVous avez 10 secondes pour vous faire des papouilles, après on lance la partie !`, 500)
 			setTimeout(function() {
 				channel.disable()
 				channel.game.waiting_command = null
