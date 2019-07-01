@@ -10,7 +10,7 @@ var data = {
 	},
 
 	data: {
-		registered_commands: ["Test", "Init", "Register", "Start", "Stop", "Marry", "Kill"],
+		registered_commands: ["Test", "Init", "Register", "Start", "Stop", "Marry", "Kill", "UsePotion"],
 		registered_roles: ["Werewolf", "Cupidon", "Villager", "Clairvoyant", "Witch"],
 	}
 }

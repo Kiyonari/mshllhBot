@@ -9,6 +9,7 @@ class WerewolfRole extends Role {
 	playDefaultTurn() {
 		this.globals.channels.get('lobby').send("werewolf default turn")
 		this.discord.channel.send(`${this.getPlayersMentionList()}allez hop hop hop on relève le nez de son tapis et on choisit son prochain martyr !`)
+		this.game.turn.werewolf_data.dead = null
 		setTimeout(() => this.discord.channel.enable(), 500)
 		this.game.waiting_command = 'kill'
 	}

@@ -10,6 +10,9 @@ class Role {
 			channel: this.globals.channels.get(this.id + "-channel")
 		}
 	}
+
+	initSpecialized() {
+	}
 }
 
 module.exports = Role;

@@ -62,7 +62,7 @@ class Start extends Command {
 		})
 		for (var member of this.globals.members.all()) {
 			if (member.nickname == "Asmoddym") {
-				member.role = this.globals.roles.get('cupidon')
+				member.role = this.globals.roles.get('witch')
 			} else {
 				member.role = this.globals.roles.get('werewolf')
 			}
@@ -100,6 +100,9 @@ class Start extends Command {
 					c.sendWelcomeMessage()
 				}
 			})
+		})
+		this.globals.roles.all(function(r) {
+			r.initSpecialized()
 		})
 		var _this = this
 		setTimeout(function() {
