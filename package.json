@@ -21,7 +21,7 @@
   "homepage": "https://github.com/Kiyonari/mshllhBot#readme",
   "dependencies": {
     "@elian-wonhalf/pretty-logger": "^1.0.1",
-    "discord.js": "^11.3.2",
+    "discord.js": "^11.5.1",
     "mysql2": "^1.5.3",
     "pg": "^7.4.3",
     "pg-hstore": "^2.3.2",

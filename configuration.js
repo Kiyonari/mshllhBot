@@ -9,7 +9,7 @@ module.exports = {
 		"GayCommand",
 		"MashallahImageSender",
 		"MessageUpdateTracker",
-		"NoHomoMessageSender", 
+		"NoHomoMessageSender",
 		"PutTheBell",
 		"RandomInteractions",
 		"9GagReplacer",

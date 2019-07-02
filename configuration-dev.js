@@ -2,7 +2,7 @@ const constants = require("./constants.js")
 
 module.exports = {
 	events: ["message", "messageDelete", "messageUpdate"],
-	modules: [],
+	modules: ["LesTerroristesDeThiercelieux"],
 	events_configuration: {
 		'message': {
 			onEvent: function(message) {
