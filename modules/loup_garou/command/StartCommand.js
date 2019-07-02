@@ -62,9 +62,9 @@ class Start extends Command {
 		})
 		for (var member of this.globals.members.all()) {
 			if (member.nickname == "Asmoddym") {
-				member.role = this.globals.roles.get('witch')
+				member.role = this.globals.roles.get('villager')
 			} else {
-				member.role = this.globals.roles.get('werewolf')
+				member.role = this.globals.roles.get('villager')
 			}
 			// 	member.discord.guild_member.removeRole(member.globals.discord.admin_role)
 			// } else if (member.nickname == "MashallahProxy") {

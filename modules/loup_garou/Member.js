@@ -42,6 +42,7 @@ class Member {
 		})
 //		this.discord.guild_member.addRole(this.globals.discord.dead_role)
 		this.dead = true
+		this.globals.members.dead_members.push(this)
 		this.globals.members.remove(_this)
 	}
 

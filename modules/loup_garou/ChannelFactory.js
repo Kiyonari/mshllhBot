@@ -28,6 +28,10 @@ class ChannelFactory {
 		return this.channels.find((i) => (i.id == 'lobby'))
 	}
 
+	getByDiscordId(id) {
+		return this.findUnique((c) => (c.discord.id == id))
+	}
+
 	getDiscordChannel(key, value) {
 		return this.globals.discord.guild.channels.find((chan) => (chan[key] == value))
 	}

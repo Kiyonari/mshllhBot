@@ -4,6 +4,7 @@ class MemberFactory {
 	constructor() {
 		this.members = []
 		this.registered_members = []
+		this.dead_members = []
 	}
 
 	create(data) {
@@ -45,6 +46,11 @@ class MemberFactory {
 	reset() {
 		this.members = []
 		this.registered_members = []
+		this.dead_members = []
+	}
+
+	dead() {
+		return this.dead_members
 	}
 
 	findByRole(role) {

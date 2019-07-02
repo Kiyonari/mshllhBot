@@ -1,15 +1,13 @@
 var Command = require("../Command.js")
 
-class KillCommand extends Command {
+class VoteCommand extends Command {
 	canExec(message, args) {
-		if (this.game.waiting_command != 'kill') {
+		console.log(this.game.waiting_command)
+		if (this.game.waiting_command != 'vote') {
 			message.channel.send(`Un peu trop tôt pour voter <@${message.author.id}> ;)`)
 			return false
 		} else if (args.length != 1) {
 			message.channel.send(`Une personne, ni plus ni moins <@${message.author.id}> :rage:`)
-			return false
-		} else if (this.globals.members.get(message.author.id).role.id != 'werewolf') {
-			message.channel.send(`Il faut être un terroriste pour faire ça <@${message.author.id}> :rage:`)
 			return false
 		} else {
 			return true
@@ -17,35 +15,30 @@ class KillCommand extends Command {
 	}
 
 	exec(message, args) {
-		var killed = this.globals.members.findUnique((m) => (m.nickname == args[0]))
-		var werewolf = this.globals.members.get(message.author.id)
-		var channel = this.globals.channels.get('werewolf-channel')
+		var voted = this.globals.members.findUnique((m) => (m.nickname == args[0]))
+		var channel = this.globals.channels.get('villager-channel')
+		var villager = this.globals.members.get(message.author.id)
 
 		if (!this.votes) {
 			this.votes = {}
 			this.votes_number = 0
-			for (var member of this.globals.members.findByRole('werewolf')) {
+			for (var member of this.globals.members.all()) {
 				this.votes[member.id] = null
 			}
 		}
-		if (!killed) {
+		if (!voted) {
 			channel.send(`**${args[0]}** n'existe pas :rage:`)
-		} else if (killed.id == message.author.id) {
-			channel.send(`<@${killed.id}> t'as pas pigé les règles toi... Si tu veux te suicider, attends le jour, la on joue sérieux :rage:`)
-		// } else if (werewolf.married && werewolf.married.id == killed.id) {
-		// 	werewolf.send(`Frr t'es ouf, tu peux pas tuer ton amoureux/se quand même !`)
 		} else {
-			if (!this.votes[werewolf.id]) {
+			if (!this.votes[villager.id]) {
 				this.votes_number++
 			}
-			this.votes[werewolf.id] = killed.id
+			this.votes[villager.id] = voted.id
 			if (this.hasRemainingVotes()) {
-				channel.send(`${this.votes_number} terroriste${this.votes_number > 1 ? 's ont ' : ' a '}voté ! Voici ceux qui doivent encore voter: **${this.getRemainingVotes().join(', ')}**\n\nVoici donc les résultats pour l'instant:\n${this.getVoteResults()}`)
+				channel.send(`${this.votes_number} villageois ${this.votes_number > 1 ? 'ont' : 'a'} voté ! Voici ceux qui doivent encore voter: **${this.getRemainingVotes().join(', ')}**\n\nVoici donc les résultats pour l'instant:\n${this.getVoteResults()}`)
 			} else {
-				var final_killed = this.getMostVotedMember()
-				channel.send(`Tout le monde a voté !\n\nEh bien c'est **${final_killed.nickname}** qui a été désigné pour sauter ~~pour la gloire d'Allah~~ pour la justice !`)
-				this.game.turn.werewolf_data.dead = final_killed
-				this.game.waiting_command = null
+				var final_voted = this.getMostVotedMember()
+				channel.send(`Tout le monde a voté !`)
+				this.game.turn.villager_data.dead = final_voted
 				this.votes = null
 				channel.disable()
 				this.game.nextTurn()
@@ -104,8 +97,8 @@ class KillCommand extends Command {
 
 	getVotesNumberById(id) {
 		var r = 0
-		for (var werewolf in this.votes) {
-			if (this.votes[werewolf] == id) {
+		for (var villager in this.votes) {
+			if (this.votes[villager] == id) {
 				r++
 			}
 		}
@@ -113,7 +106,7 @@ class KillCommand extends Command {
 	}
 
 	hasRemainingVotes() {
-		return this.votes_number != this.globals.members.findByRole('werewolf').length
+		return this.votes_number != this.globals.members.all().length
 	}
 
 	getObjectLength(obj) {
@@ -125,7 +118,7 @@ class KillCommand extends Command {
 	}
 }
 
-module.exports = new KillCommand({
-	id: 'kill',
-	authorized_channels: ['werewolf-channel']
+module.exports = new VoteCommand({
+	id: 'vote',
+	authorized_channels: ['villager-channel']
 })

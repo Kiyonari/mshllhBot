@@ -25,6 +25,7 @@ class UsePotionCommand extends Command {
 					channel.send(`Ca marche !`)
 					this.game.waiting_command = null
 					this.game.turn.werewolf_data.dead = null
+					channel.disable()
 					this.game.nextTurn()
 				}
 				break
@@ -44,6 +45,7 @@ class UsePotionCommand extends Command {
 						channel.send(`Ca marche !`)
 						this.game.waiting_command = null
 						this.game.turn.witch_data.dead = killed
+						channel.disable()
 						this.game.nextTurn()
 					}
 				}
@@ -52,6 +54,7 @@ class UsePotionCommand extends Command {
 				channel.send(`Ca marche ! ~~T'es nul~~`)
 				this.game.waiting_command = null
 				this.game.turn.witch_data.dead = null
+				channel.disable()
 				this.game.nextTurn()
 				break
 			default:

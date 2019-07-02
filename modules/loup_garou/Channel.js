@@ -71,13 +71,16 @@ class Channel {
 	}
 
 	sendWelcomeMessage() {
-		this.send(this.getWelcomeMessage(), 200)
+		var msg = this.getWelcomeMessage()
+		if (msg != "") {
+			this.send(msg, 200)
+		}
 	}
 
 	getWelcomeMessage() {
 		switch (this.role) {
 			case 'villager': return `Vous êtes ici dans le fameux village de Hénin-Beaumont, ~~fief du FN~~ heureuse bourgade paisible et prospère !\nAucune attaque de terroristes en vue, vous pouvez dormir sur vos 2 oreilles !`
-			case 'cupidon': return `Coucou bébé qui pleure ! Tu vas pouvoir choisir 2 personnes qui vont s'aimer pour toujours :3`
+			case 'cupidon': return ""
 			case 'werewolf': return `Coucou ! Bienvenue sur le channel réversé aux combattants de la liberté :heart:`
 			default: return "Coucou"
 		}

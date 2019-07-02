@@ -2,76 +2,151 @@ const BaseModule = require("./BaseModule.js")
 
 var _globals = require("./loup_garou/globals.js")
 
-var _game = {
-	status: 'stop',
-	turn: {
-		role: -1,
-		id: 0,
-		werewolf_data: {
-			dead: null
-		},
-		clairvoyant_data: {
-			found: null
-		},
-	},
-	waiting_command: null,
-	initialized: false,
-	order: {
-		start: ['cupidon'],
-		default: ['clairvoyant', 'werewolf', 'witch']
+class Game {
+	constructor() {
+		this.init()
 	}
-}
 
-_game.nextTurn = function(stacked = false) {
-	console.log("nextTurn: " + _game.turn.id + " (" + _game.turn.role + ")")
-	var order = _game.order[_game.turn.id == 0 ? 'start' : 'default']
-	console.log("order: " + (_game.turn.id == 0 ? 'start' : 'default'))
-	if (_game.turn.role + 1 >= order.length) {
-		console.log("arrived at the end")
-		_game.turn.role = -1
-		_game.turn.id++
-		if (_game.turn.id != 1) {
-			_game.newTurn()
-			return;
-		} else {
-			order = _game.order['default']
-		}
-	}
-	var playing_role = order[_game.turn.role + 1]
-	var played = false
-	console.log("playing role " + playing_role)
-	_game.turn.role++
-	_globals.roles.all(function(r) {
-		if (r.id == playing_role && r.attributed) {
-			console.log("calling method of Role " + r.id)
-			r['play' + ((_game.turn.id == 0) ? 'Start' : 'Default') + 'Turn']()
-			played = true
-		} else {
-			console.log("disabling channel " + r.discord.channel.id)
-			if (!stacked) {
-				r.discord.channel.disable()
+	init() {
+		this.status = 'stop'
+		this.turn = {
+			role: -1,
+			id: 0,
+			werewolf_data: {
+				dead: null
+			},
+			clairvoyant_data: {
+				found: null
+			},
+			witch_data: {
+				dead: null
+			},
+			villager_data: {
+				dead: null
 			}
 		}
-	})
-	if (!played) {
-		_game.nextTurn(true)
+		this.waiting_command = null
+		this.initialized = false
+		this.order = {
+			start: ['cupidon'],
+			default: ['clairvoyant', 'werewolf', 'witch']
+		}
 	}
-	console.log("turn id at the end: " + _game.turn.id)
+
+	nextTurn(stacked = false) {
+		console.log("nextTurn: " + this.turn.id + " (" + this.turn.role + ")")
+		if (this.waiting_command == 'vote' && this.turn.id != 1) {
+			console.log("calling villagerTurn")
+			this.villagerTurn()
+			return
+		}
+		var order = this.order[this.turn.id == 0 ? 'start' : 'default']
+		console.log("order: " + (this.turn.id == 0 ? 'start' : 'default'))
+		if (this.turn.role + 1 >= order.length) {
+			console.log("arrived at the end")
+			this.turn.role = -1
+			this.turn.id++
+			if (this.turn.id != 1) {
+				console.log("playing newTurn")
+				this.newTurn()
+				console.log("stopped newTurn")
+				return 'vote'
+			} else {
+				order = this.order['default']
+			}
+		}
+		var playing_role = order[this.turn.role + 1]
+		var played = false
+		console.log("playing role " + playing_role)
+		this.turn.role++
+		_globals.roles.all(function(r) {
+			if (r.id == playing_role && r.attributed) {
+				console.log("calling method of Role " + r.id)
+				r['play' + ((r.game.turn.id == 0) ? 'Start' : 'Default') + 'Turn']()
+				played = true
+			} else {
+				console.log("disabling channel " + r.discord.channel.id)
+				if (!stacked) {
+					r.discord.channel.disable()
+				}
+			}
+		})
+		if (!played) {
+			console.log("stacking")
+			var ret = this.nextTurn(true)
+			if (ret) {
+				this.waiting_command = ret
+			}
+			console.log("popped last nextTurn")
+			return ret
+		}
+		console.log("turn id at the end: " + this.turn.id)
+	}
+
+	newTurn() {
+		var villager_channel = _globals.channels.get('villager-channel')
+		villager_channel.send(`Le jour se lève sur Hénin-Beaumont...`)
+
+		var deads = {
+			'witch': this.turn.witch_data.dead,
+			'werewolf': this.turn.werewolf_data.dead
+		}
+		var dead_nb = (deads.witch ? 1 : 0) + (deads.werewolf ? 1 : 0)
+
+		if (dead_nb) {
+			villager_channel.send(`\nEt nous avons ${dead_nb} mort${dead_nb > 1 ? 's' : ''} à déplorer :cry:`)
+			var txt = ""
+			if (deads.witch) {
+				txt = `<@${deads.witch.id}>`
+			}
+			if (deads.werewolf) {
+				txt += txt != "" ? ` et <@${deads.werewolf.id}>` : `<@${deads.werewolf.id}>`
+			}
+
+			villager_channel.send(txt + ` ${dead_nb > 1 ? 'sont allés' : 'est allé'} rejoindre ~~Allah~~ le Ciel :cry:`)
+			if (deads.witch && deads.werewolf && deads.witch.married && deads.witch.married.id == deads.werewolf.id) {
+				deads.werewolf = null
+			}
+			for (var role in deads) {
+				var dead = deads[role]
+				if (dead) {
+					if (dead.married) {
+						villager_channel.send(`Or il s'avère que <@${dead.id}> était marié à <@${dead.married.id}>... Quel dommaaaaaaage... :cry:`)
+						dead.married.kill()
+					}
+					dead.kill()
+				}
+			}
+			villager_channel.send(`Il reste donc ${_globals.members.all().length} personne${_globals.members.all().length > 1 ? 's' : ''} au village... Mais vous inquiétez pas, tout va très bien !`)
+		} else {
+			villager_channel.send(`\nEt nous n'avons aucun incident à déplorer ! La nuit fut parfaitement calme !`)
+		}
+		villager_channel.send(`\n\nIl est maintenant temps de voter pour votre prochaine victime, villageois ! Amusez-vous bien :3`)
+		villager_channel.enable()
+	}
+
+	villagerTurn() {
+		var villager_channel = _globals.channels.get('villager-channel')
+		var dead = this.turn.villager_data.dead
+
+		villager_channel.send(`Eh bien c'est <@${dead.id}> qui sera pendu haut et court jusqu'à ce que morts s'en suivent !`)
+		if (dead.married) {
+			villager_channel.send(`Or il s'avère que <@${dead.id}> était marié à <@${dead.married.id}>... Quel dommaaaaaaage... :cry:`)
+			dead.married.kill()
+		}
+		dead.kill()
+		villager_channel.send(`Il reste donc ${_globals.members.all().length} personne${_globals.members.all().length > 1 ? 's' : ''} au village... Mais vous inquiétez pas, tout va très bien !`)
+		villager_channel.send(`\n\nAllez, au dodo !`)
+		var _this = this
+		setTimeout(function() {
+			villager_channel.disable()
+			_this.waiting_command = null
+			_this.nextTurn()
+		}, 300)
+	}
 }
 
-_game.newTurn = function() {
-	var villager_channel = _globals.channels.get('villager-channel')
-	_game.waiting_command = 'vote'
-	villager_channel.send(`Le jour se lève sur Hénin-Beaumont, et les terroristes ont encore frappé... Et cette fois-ci, c'est <@${_game.turn.werewolf_data.dead.id}> qui s'est fait exploser la tronche dans la rue :cry:`)
-
-	if (_game.turn.werewolf_data.dead.married) {
-		villager_channel.send(`Or il s'avère que <@${_game.turn.werewolf_data.dead.id}> était marié à <@${_game.turn.werewolf_data.dead.married.id}>... Quel dommaaaaaaage... :cry:`)
-		_game.turn.werewolf_data.dead.married.kill()
-		_game.turn.werewolf_data.dead.kill()
-	}
-	villager_channel.send(`Il reste donc ${_globals.members.all().length} personnes au village... Mais vous inquiétez pas, tout va très bien ! Allez, au dodo !`)
-	_game.nextTurn()
-}
+var _game = null
 
 class LesTerroristesDeThiercelieux extends BaseModule {
 	constructor(conf) {
@@ -84,7 +159,7 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	process(message) {
-		if (!_game.initialized) {
+		if (!_game || !_game.initialized) {
 			this.init(message)
 		}
 		var channel = _globals.channels.findUnique((i) => (i.discord.id == message.channel.id))
@@ -112,34 +187,13 @@ class LesTerroristesDeThiercelieux extends BaseModule {
 	}
 
 	init(message) {
+		_game = new Game()
 		_globals.discord.guild = message.guild
 		this.createChannels()
 		this.createCommands()
 		this.createRoles()
 		this.initLog()
 		_game.status = 'stop'
-		_game.turn = {
-			role: -1,
-			id: 0,
-			werewolf_data: {
-				dead: null
-			},
-			clairvoyant_data: {
-				found: null
-			},
-		}
-		_game.waiting_command = null
-		_game.initialized = false
-		_game.turn = {
-			role: -1,
-			id: 0,
-			werewolf_data: {
-				dead: null
-			},
-			clairvoyant_data: {
-				found: null
-			},
-		}
 		_game.initialized = true
 	}
 

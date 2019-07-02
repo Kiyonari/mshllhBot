@@ -19,7 +19,7 @@ class WitchRole extends Role {
 				txt += `\n\nTu peux ${self ? 'te' : 'le'} réanimer en faisant un petit ${this.globals.commands.format("use-potion life")}...`
 			}
 			if (this.potion.death) {
-				txt += `\n\nTu peux tuer quelqu'un ~~si t'es un fdp~~ si tu veux, en faisant un petit } :3`
+				txt += `\n\nTu peux tuer quelqu'un ~~si t'es un fdp~~ si tu veux, en faisant un petit ${this.globals.commands.format("use-potion death")} :3`
 			}
 
 			if (!this.potion.life && !this.potion.death) {
