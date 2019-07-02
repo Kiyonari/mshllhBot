@@ -13,6 +13,9 @@ class Role {
 
 	initSpecialized() {
 	}
+
+	playKillTurn() {
+	}
 }
 
 module.exports = Role;

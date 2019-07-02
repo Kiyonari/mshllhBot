@@ -29,6 +29,9 @@ class Member {
 
 	kill() {
 		console.log("killing " + this.nickname)
+		if (this.role) {
+			this.role.playKillTurn()
+		}
 		var _this = this
 		this.globals.channels.all(function(c) {
 			if (!c.lobby) {
